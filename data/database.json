@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "defaultLanguage": "de",
+  "supportedLanguages": [
+    "de",
+    "en"
+  ],
+  "languages": {
+    "de": "Deutsch",
+    "en": "English"
+  },
+  "tokenCategories": {
+    "0": {
+      "labels": {
+        "de": "Allgemein"
+      }
+    },
+    "F": {
+      "labels": {
+        "de": "Freiform"
+      },
+      "descriptions": {
+        "de": "Für Datensteine, die in keine andere Kategorie passen, sowie für Datensteine, die für andere erstellt wurden."
+      }
+    }
+  },
+  "linkCategories": {
+    "youtube": {
+      "labels": {
+        "de": "Youtube",
+        "en": "Youtube"
+      }
+    },
+    "channel": {
+      "labels": {}
+    },
+    "video": {
+      "labels": {}
+    },
+    "playlist": {
+      "labels": {}
+    }
+  },
+  "categoryRules": [
+    {
+      "linkCategoryId": "youtube",
+      "appliesTo": "link",
+      "condition": {
+        "field": "url.hostname",
+        "matchesAny": [
+          "youtube.com",
+          "www.youtube.com",
+          "youtu.be",
+          "www.youtu.be"
+        ]
+      }
+    },
+    {
+      "tokenCategoryId": "F",
+      "appliesTo": "token",
+      "condition": {
+        "field": "id",
+        "startsWith": "F"
+      }
+    }
+  ],
+  "links": {
+    "nfc-dnf01": {
+      "url": "https://nfc.tlhIngan.at/2026/DnF01",
+      "categories": [],
+      "descriptions": {}
+    },
+    "youtube-payqaghtlhingan": {
+      "url": "https://www.youtube.com/@payqaghtlhingan",
+      "categories": [],
+      "descriptions": {}
+    },
+    "dropbox-folder": {
+      "url": "https://www.dropbox.com/scl/fo/gpy26c55f33mex0cl1xur/AHIk7f0hSzeda42GnzFwZ5w?rlkey=45fe46ibzbt9v21va6imdb3ma&dl=0",
+      "categories": [],
+      "descriptions": {}
+    },
+    "discord-invite": {
+      "url": "https://discord.gg/NrUhpvb",
+      "categories": [],
+      "descriptions": {}
+    },
+    "klingonisch-de": {
+      "url": "https://klingonisch.de",
+      "categories": [],
+      "descriptions": {}
+    },
+    "kli-org": {
+      "url": "https://kli.org",
+      "categories": [],
+      "descriptions": {}
+    },
+    "klingon-wiki": {
+      "url": "https://klingon.wiki",
+      "categories": [],
+      "descriptions": {}
+    },
+    "klingon-wiki-de-home": {
+      "url": "https://klingon.wiki/De/Hauptseite",
+      "categories": [],
+      "descriptions": {}
+    },
+    "klingon-wiki-dictionary-home": {
+      "url": "https://klingon.wiki/Wort/Hauptseite",
+      "categories": [],
+      "descriptions": {}
+    }
+  },
+  "tokens": {
+    "DnF01": {
+      "year": 2026,
+      "categoryId": "F",
+      "chipType": "NXP NTAG216",
+      "descriptions": {},
+      "media": {
+        "altTexts": {
+          "model": {
+            "de": "Interaktive 3D-Ansicht des Datensteins DnF01.",
+            "en": "Interactive 3D view of data stone DnF01."
+          },
+          "front": {
+            "de": "Vorderseite des Datensteins DnF01 mit klingonischem Schriftzug und NFC-Symbol.",
+            "en": "Front of data stone DnF01, with Klingon lettering and an NFC symbol."
+          },
+          "back": {
+            "de": "Rückseite des Datensteins DnF01 mit Hutmotiv.",
+            "en": "Back of data stone DnF01, featuring a hat design."
+          }
+        }
+      },
+      "legacyIds": [
+        "DnF001"
+      ],
+      "links": [
+        "nfc-dnf01",
+        "youtube-payqaghtlhingan",
+        "dropbox-folder",
+        "discord-invite",
+        "klingonisch-de",
+        "kli-org",
+        "klingon-wiki",
+        "klingon-wiki-de-home",
+        "klingon-wiki-dictionary-home"
+      ],
+      "nfcText": {
+        "originalLanguage": "tlh",
+        "original": "payqagh De'nagh\nlatlh De': nfc.tlhIngan.at/2026/DnF01",
+        "descriptions": {}
+      }
+    }
+  }
+}
