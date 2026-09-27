@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "defaultLanguage": "de",
+  "defaultChipType": "NXP NTAG216",
   "supportedLanguages": [
     "de",
     "en"
@@ -13,6 +14,9 @@
     "0": {
       "labels": {
         "de": "Allgemein"
+      },
+      "descriptions": {
+        "de": "Datensteine die keine spezialisierten Inhalte haben, sondern eine Übersicht über alle Themen darstellen."
       }
     },
     "F": {
@@ -32,13 +36,25 @@
       }
     },
     "channel": {
-      "labels": {}
+      "labels": {
+        "de": "Kanal",
+        "en": "Channel"
+      }
     },
     "video": {
       "labels": {}
     },
     "playlist": {
-      "labels": {}
+      "labels": {
+        "de": "Playlist",
+        "en": "Playlist"
+      }
+    },
+    "facebook": {
+      "labels": {
+        "de": "Facebook",
+        "en": "Facebook"
+      }
     }
   },
   "categoryRules": [
@@ -52,6 +68,17 @@
           "www.youtube.com",
           "youtu.be",
           "www.youtu.be"
+        ]
+      }
+    },
+    {
+      "linkCategoryId": "facebook",
+      "appliesTo": "link",
+      "condition": {
+        "field": "url.hostname",
+        "matchesAny": [
+          "facebook.com",
+          "www.facebook.com"
         ]
       }
     },
@@ -70,9 +97,14 @@
       "categories": [],
       "descriptions": {}
     },
+    "nfc-dnf02": {
+      "url": "https://nfc.tlhIngan.at/2026/DnF02",
+      "categories": [],
+      "descriptions": {}
+    },
     "youtube-payqaghtlhingan": {
       "url": "https://www.youtube.com/@payqaghtlhingan",
-      "categories": [],
+      "categories": ["channel"],
       "descriptions": {}
     },
     "dropbox-folder": {
@@ -109,12 +141,55 @@
       "url": "https://klingon.wiki/Wort/Hauptseite",
       "categories": [],
       "descriptions": {}
+    },
+    "qephom": {
+      "url": "http://www.qephom.de",
+      "categories": [],
+      "descriptions": {}
+    },
+    "klenginem": {
+      "url": "http://www.klenginem.de",
+      "categories": [],
+      "descriptions": {}
+    },
+    "lieven-litaer": {
+      "url": "http://www.lieven-litaer.de",
+      "categories": [],
+      "descriptions": {}
+    },
+    "egpyt": {
+      "url": "http://www.egpyt.de/",
+      "categories": [],
+      "descriptions": {}
+    },
+    "youtube-klingonteacher": {
+      "url": "http://www.youtube.com/klingonteacher",
+      "categories": ["channel"],
+      "descriptions": {}
+    },
+    "facebook-dki": {
+      "url": "http://www.facebook.com/deutschesklingonischinstitut/",
+      "categories": [],
+      "descriptions": {}
+    },
+    "youtube-playlist-tt43a9uiyq8": {
+      "url": "http://www.youtube.com/watch?v=tt43a9uIYQ8&list=PLBE9160F5DA940513",
+      "categories": ["playlist"],
+      "descriptions": {}
+    },
+    "youtube-playlist-foflnx-mhdg": {
+      "url": "http://www.youtube.com/watch?v=FOflNX-MHdg&list=PLFEBlPXWQfsiGKG3Pkq9H3s8MOesNfn12",
+      "categories": ["playlist"],
+      "descriptions": {}
     }
   },
   "tokens": {
     "DnF01": {
       "year": 2026,
       "categoryId": "F",
+      "shortLabel": {
+        "de": "Datenstein Peter"
+      },
       "chipType": "NXP NTAG216",
       "descriptions": {},
       "media": {
@@ -152,6 +227,49 @@
         "original": "payqagh De'nagh\nlatlh De': nfc.tlhIngan.at/2026/DnF01",
         "descriptions": {}
       }
+    },
+    "DnF02": {
+      "year": 2026,
+      "categoryId": "F",
+      "chipType": "NXP NTAG216",
+      "shortLabel": {
+        "de": "Datenstein Lieven"
+      },
+      "nfcText": {
+        "originalLanguage": "de",
+        "original": "Lieven Litaer – Klingonischlehrer des Deutschen Klingonisch-Instituts\nnfc.tlhIngan.at/2026/DnF02",
+        "descriptions": {}
+      },
+      "descriptions": {},
+      "media": {
+        "altTexts": {
+          "model": {
+            "de": "Interaktive 3D-Ansicht des Datensteins DnF02.",
+            "en": "Interactive 3D view of data stone DnF02."
+          },
+          "front": {
+            "de": "Vorderseite des achteckigen, bronzegoldenen Datensteins DnF02 mit Klingonisch-Signet und NFC-Symbol.",
+            "en": "Front of the bronze-gold octagonal data stone DnF02, with a Klingon insignia and NFC symbol."
+          },
+          "back": {
+            "de": "Rückseite des bronzegoldenen Datensteins DnF02 mit dunklem, geflügeltem Emblem.",
+            "en": "Back of the bronze-gold data stone DnF02, with a dark winged emblem."
+          }
+        }
+      },
+      "links": [
+        "nfc-dnf02",
+        "qephom",
+        "klingonisch-de",
+        "klingon-wiki",
+        "klenginem",
+        "lieven-litaer",
+        "egpyt",
+        "youtube-klingonteacher",
+        "facebook-dki",
+        "youtube-playlist-tt43a9uiyq8",
+        "youtube-playlist-foflnx-mhdg"
+      ]
     }
   }
 }

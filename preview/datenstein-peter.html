@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark light">
+  <title>Datenstein DnF01 – 3D-Vorschau</title>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js"></script>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: system-ui, sans-serif;
+      background: #15191d;
+      color: #f2f4f5;
+    }
+    * { box-sizing: border-box; }
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+    header, footer { padding: 1rem clamp(1rem, 4vw, 2.5rem); }
+    header { border-bottom: 1px solid #343a40; }
+    h1 { margin: 0; font-size: 1.15rem; font-weight: 600; }
+    main { min-height: 0; padding: 1rem; display: grid; }
+    model-viewer {
+      width: 100%;
+      height: min(76vh, 760px);
+      min-height: 340px;
+      background: radial-gradient(ellipse at center, #30383f 0%, #20262b 55%, #15191d 100%);
+      border-radius: 12px;
+      --poster-color: transparent;
+    }
+    .fallback {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+      align-content: center;
+    }
+    .fallback[hidden], model-viewer[hidden] { display: none; }
+    figure { margin: 0; min-width: 0; }
+    figure img {
+      display: block;
+      width: 100%;
+      height: min(68vh, 680px);
+      object-fit: contain;
+      border-radius: 12px;
+      background: radial-gradient(ellipse at center, #30383f 0%, #20262b 55%, #15191d 100%);
+    }
+    figcaption { padding: .65rem .25rem; color: #c3cbd1; text-align: center; }
+    .status { margin: 0; color: #c3cbd1; font-size: .9rem; }
+    footer { border-top: 1px solid #343a40; }
+    @media (max-width: 600px) {
+      main { padding: .5rem; }
+      model-viewer { height: 72vh; min-height: 280px; border-radius: 8px; }
+      .fallback { gap: .5rem; }
+      figure img { height: 62vh; min-height: 240px; border-radius: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <header><h1>Datenstein DnF01</h1></header>
+  <main>
+    <model-viewer
+      id="viewer"
+      src="../3d/DnF01/DnF01.glb"
+      alt="3D-Modell des Datensteins DnF01"
+      camera-controls
+      interaction-prompt="none"
+      auto-rotate
+      rotation-per-second="18deg"
+      shadow-intensity="1"
+      exposure="1"
+      touch-action="pan-y"
+      style="visibility: hidden">
+    </model-viewer>
+    <section class="fallback" id="fallback" aria-label="Statische Ansichten des Datensteins">
+      <figure>
+        <img src="../3d/DnF01/DnF01_vorne.webp" alt="Vorderseite des Datensteins DnF01 mit klingonischem Schriftzug und NFC-Symbol" width="512" height="512">
+        <figcaption>Vorderseite</figcaption>
+      </figure>
+      <figure>
+        <img src="../3d/DnF01/DnF01_hinten.webp" alt="Rückseite des Datensteins DnF01 mit Hutmotiv" width="512" height="512">
+        <figcaption>Rückseite</figcaption>
+      </figure>
+    </section>
+  </main>
+  <footer><p class="status" id="status" role="status">Statische Ansichten. 3D-Modell wird geladen …</p></footer>
+  <script>
+    const viewer = document.querySelector('#viewer');
+    const fallback = document.querySelector('#fallback');
+    const status = document.querySelector('#status');
+    let loaded = false;
+    const fallbackTimer = window.setTimeout(() => {
+      if (!loaded) status.textContent = '3D-Ansicht nicht verfügbar. Vorder- und Rückseite werden als Bilder angezeigt.';
+    }, 15000);
+    viewer.addEventListener('load', () => {
+      loaded = true;
+      window.clearTimeout(fallbackTimer);
+      viewer.style.visibility = 'visible';
+      fallback.hidden = true;
+      status.textContent = '3D-Modell geladen. Mit Maus oder Touch drehen, mit dem Mausrad oder per Pinch zoomen.';
+    });
+    viewer.addEventListener('error', () => {
+      window.clearTimeout(fallbackTimer);
+      viewer.style.visibility = 'hidden';
+      fallback.hidden = false;
+      status.textContent = '3D-Ansicht nicht verfügbar. Vorder- und Rückseite werden als Bilder angezeigt.';
+    });
+  </script>
+</body>
+</html>

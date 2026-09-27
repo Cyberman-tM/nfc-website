@@ -178,6 +178,11 @@ def szene_leeren():
     bpy.ops.object.select_all(action="SELECT")
     bpy.ops.object.delete(use_global=False)
 
+    # Die Material-IDs werden unten ggf. aus bpy.data.materials entfernt.
+    # Den Python-Cache ebenfalls leeren, damit der nächste Datenstein keine
+    # veralteten StructRNA-Referenzen aus dem vorherigen Durchlauf verwendet.
+    MATERIALIEN.clear()
+
     for datablocks in (
         bpy.data.meshes,
         bpy.data.curves,

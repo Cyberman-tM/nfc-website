@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import html
 import json
 import re
@@ -16,6 +17,8 @@ ROOT = Path(__file__).resolve().parents[1]
 DATABASE = ROOT / "data" / "database.json"
 TOKEN_ID = re.compile(r"^Dn[0-9A-F]{3}$")
 LEGACY_ID = re.compile(r"^Dn[0-9A-F]{4}$")
+# Make browser caches refresh generated CSS whenever the generator/style source changes.
+ASSET_VERSION = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()[:12]
 
 
 def esc(value: object) -> str:
@@ -42,7 +45,7 @@ def write_page(out: Path, relative: str, title: str, description: str, body: str
   <meta name="description" content="{esc(description)}">
   <title>{esc(title)} · De' nagh</title>
   <link rel="icon" type="image/svg+xml" href="{prefix}assets/favicon.svg">
-  <link rel="stylesheet" href="{prefix}assets/site.css">
+  <link rel="stylesheet" href="{prefix}assets/site.css?v={ASSET_VERSION}">
   {''.join(extra_scripts)}
 </head>
 <body>
@@ -89,6 +92,18 @@ def localized(value: dict, language: str = "de") -> str:
     return value.get(language) or value.get("de") or ""
 
 
+def short_label(token: dict) -> str:
+    """Return a token's localized short label, if one is available."""
+    return localized(token.get("shortLabel", {}))
+
+
+def token_reference(token_id: str, token: dict) -> str:
+    """Render a token link whose tooltip identifies it without repeating the label visibly."""
+    label = short_label(token)
+    attributes = f' title="{esc(label)}" aria-label="{esc(token_id)} – {esc(label)}"' if label else ""
+    return f'<a href="../{esc(token["year"])}/{esc(token_id)}/"{attributes}>{esc(token_id)}</a>'
+
+
 def copy_token_media(token_id: str, out: Path) -> dict[str, bool]:
     """Publish only the named GLB and fallback images; never copy Blender/STL sources."""
     source = ROOT / "3d" / token_id
@@ -120,11 +135,13 @@ def token_card(token_id: str, token: dict, context: str = "", href_target: str |
             thumbnails.append(f'<figure><img src="../media/{esc(token_id)}/{esc(filename)}" alt="{esc(alt)}" width="512" height="512"><figcaption>{caption}</figcaption></figure>')
     gallery = f'<div class="year-card-gallery">{"".join(thumbnails)}</div>' if thumbnails else ""
     context_markup = f'<span class="eyebrow">{esc(context)}</span>' if context else ""
+    label = short_label(token)
+    label_markup = f'<span class="year-card-short-label">{esc(label)}</span>' if label else ""
     description = localized(token.get("descriptions", {})) or "Beschreibung noch nicht eingetragen."
     target = href_target or f"../{token['year']}/{token_id}/"
     return f'''<a class="record-card year-token-card" href="{esc(target)}">
   <span class="year-card-seal"><strong>{esc(token_id)}</strong></span>
-  <span class="year-card-copy">{context_markup}<span class="year-card-description">{esc(description)}</span></span>
+  <span class="year-card-copy">{context_markup}{label_markup}<span class="year-card-description">{esc(description)}</span></span>
   {gallery}
 </a>'''
 
@@ -161,6 +178,11 @@ def render(out: Path, db: dict) -> None:
     validate(db)
     tokens = db.get("tokens", {})
     links = db.get("links", {})
+    # Token URLs stay on each token page, but the global directory focuses on external targets.
+    public_links = {
+        link_id: link for link_id, link in links.items()
+        if (urlparse(link.get("url", "")).hostname or "").lower() != "nfc.tlhingan.at"
+    }
     years = sorted({int(token["year"]) for token in tokens.values() if token.get("year") is not None})
     token_usage: dict[str, list[tuple[str, dict]]] = {link_id: [] for link_id in links}
     for token_id, token in tokens.items():
@@ -169,9 +191,12 @@ def render(out: Path, db: dict) -> None:
 
     token_cards = []
     for token_id, token in sorted(tokens.items()):
+        label = short_label(token)
+        label_markup = f'<span class="token-card-short-label">{esc(label)}</span>' if label else ""
         token_cards.append(f'''<a class="record-card" href="{esc(token['year'])}/{esc(token_id)}/">
   <span class="eyebrow">{esc(token['year'])} · {esc(category_name(db, token['categoryId']))}</span>
   <strong>{esc(token_id)}</strong>
+  {label_markup}
   <span>{esc(localized(token.get('descriptions', {})) or 'Beschreibung noch nicht eingetragen.')}</span>
 </a>''')
     latest_year = years[-1] if years else None
@@ -185,7 +210,7 @@ def render(out: Path, db: dict) -> None:
         for category_id, count in sorted(category_counts.items(), key=lambda item: int(item[0], 16))
     )
     home_token_rows = "".join(
-        f'<li><a href="{esc(token["year"])}/{esc(token_id)}/"><span><strong>{esc(token_id)}</strong><small>{esc(category_name(db, token["categoryId"]))}</small></span><span>{esc(token["year"])} <span aria-hidden="true">↗</span></span></a></li>'
+        f'<li><a href="{esc(token["year"])}/{esc(token_id)}/"><span><strong>{esc(token_id)}</strong><small>{esc(short_label(token) or category_name(db, token["categoryId"]))}</small></span><span>{esc(token["year"])} <span aria-hidden="true">↗</span></span></a></li>'
         for token_id, token in sorted(tokens.items())
     )
     home_content = f'''<section class="hero">
@@ -196,14 +221,14 @@ def render(out: Path, db: dict) -> None:
 <section class="home-dashboard" aria-labelledby="overview-title">
   <div class="section-heading"><h2 id="overview-title">Bestand</h2></div>
   <div class="overview-stats">
-    <a class="overview-stat" href="tokens/"><span>Datensteine</span><strong>{len(tokens)}</strong><small>Alle IDs ansehen ↗</small></a>
+    <a class="overview-stat" href="tokens/"><span>Datensteine</span><strong>{len(tokens)}</strong></a>
     <a class="overview-stat" href="years/"><span>Jahrgänge</span><strong>{len(years)}</strong><small>Jahrgangsseiten öffnen ↗</small></a>
     <a class="overview-stat" href="categories/"><span>Kategorien</span><strong>{len(db.get("tokenCategories", {}))}</strong><small>{sum(1 for count in category_counts.values() if count)} belegt · Übersicht ↗</small></a>
-    <a class="overview-stat" href="links/"><span>Linkziele</span><strong>{len(links)}</strong><small>Verzeichnis öffnen ↗</small></a>
+    <a class="overview-stat" href="links/"><span>Linkziele</span><strong>{len(public_links)}</strong><small>Verzeichnis öffnen ↗</small></a>
   </div>
   <div class="overview-breakdown">
-    <section><div class="section-heading"><h3>Jahrgänge</h3><a class="text-link" href="years/">Alle ansehen ↗</a></div><ul class="overview-list">{home_year_rows or '<li class="empty-state">Noch keine Jahrgänge eingetragen.</li>'}</ul></section>
-    <section><div class="section-heading"><h3>Kategorien</h3><a class="text-link" href="categories/">Alle ansehen ↗</a></div><ul class="overview-list">{home_category_rows or '<li class="empty-state">Noch keine Kategorien eingetragen.</li>'}</ul></section>
+    <section><div class="section-heading"><h3><a href="years/">Jahrgänge</a></h3></div><ul class="overview-list">{home_year_rows or '<li class="empty-state">Noch keine Jahrgänge eingetragen.</li>'}</ul></section>
+    <section><div class="section-heading"><h3><a href="categories/">Kategorien</a></h3></div><ul class="overview-list">{home_category_rows or '<li class="empty-state">Noch keine Kategorien eingetragen.</li>'}</ul></section>
   </div>
   <section class="overview-token-section"><div class="section-heading"><h3><a href="tokens/">Datensteine</a></h3></div><ul class="overview-list" id="home-token-list">{home_token_rows or '<li class="empty-state">Noch keine Datensteine eingetragen.</li>'}</ul></section>
 </section>'''
@@ -229,7 +254,10 @@ def render(out: Path, db: dict) -> None:
     for category_id, category in sorted(cats.items()):
         label = category_name(db, category_id)
         member_ids = [token_id for token_id, token in tokens.items() if token.get("categoryId") == category_id]
-        members = "".join(f'<a class="tag" href="../{esc(tokens[token_id]["year"])}/{esc(token_id)}/">{esc(token_id)}</a>' for token_id in sorted(member_ids))
+        members = "".join(
+            f'<a class="tag" href="../{esc(tokens[token_id]["year"])}/{esc(token_id)}/">{esc(token_id + (" · " + short_label(tokens[token_id]) if short_label(tokens[token_id]) else ""))}</a>'
+            for token_id in sorted(member_ids)
+        )
         descriptions = localized(category.get("descriptions", {})) or "Beschreibung folgt."
         category_items.append(f'''<article class="category-card" id="category-{esc(category_id)}"><div class="category-number">{esc(category_id)}</div><div class="category-copy"><p class="eyebrow">Kategorie {esc(category_id)}</p><h2>{esc(label)}</h2><p>{esc(descriptions)}</p><div class="tag-list">{members or '<span class="muted">Noch keine Datensteine</span>'}</div></div></article>''')
     categories_content = f'''<header class="page-heading categories-page-heading"><h1>Kategorien</h1><p>Die Kategorie ist das erste Zeichen der Dn-ID. Neue Kategorien können ergänzt werden, ohne bestehende Datensteine umzubenennen.</p></header>
@@ -299,12 +327,14 @@ def render(out: Path, db: dict) -> None:
             label = localized(link.get("descriptions", {})) or url
             token_links.append(f'<li><a href="{esc(url)}">{esc(label)}</a></li>')
         nfc_text = token.get("nfcText", {}).get("original", "")
-        chip_type = token.get("chipType") or "Noch nicht angegeben"
+        chip_type = token.get("chipType") or db.get("defaultChipType") or "Noch nicht angegeben"
+        label = short_label(token)
+        label_markup = f'<p class="token-hero-short-label">{esc(label)}</p>' if label else ""
         description = localized(token.get("descriptions", {}))
-        detail = esc(description) if description else '<p class="empty-state">Die ausführliche Beschreibung für diesen Datenstein ist noch nicht eingetragen.</p>'
+        detail = f'<p class="token-description">{esc(description)}</p>' if description else '<p class="empty-state">Die ausführliche Beschreibung für diesen Datenstein ist noch nicht eingetragen.</p>'
         nfc_block = f'<pre class="nfc-text">{esc(nfc_text)}</pre>' if nfc_text else '<p class="muted">Kein Text-Eintrag in den Quelldaten hinterlegt.</p>'
         body = f'''<nav class="breadcrumbs" aria-label="Brotkrumennavigation"><a href="../../years/">Jahrgänge</a><span aria-hidden="true">/</span><a href="../">{year}</a><span aria-hidden="true">/</span><span aria-current="page">{esc(token_id)}</span></nav>
-<header class="token-heading"><div class="token-identity"><div class="token-seal"><h1>{esc(token_id)}</h1><span>{esc(category_name(db, category_id))}</span></div></div><div class="token-hero-description">{detail}</div>{heading_visual}</header>
+<header class="token-heading"><div class="token-identity"><div class="token-seal"><h1>{esc(token_id)}</h1><span>{esc(category_name(db, category_id))}</span></div></div><div class="token-hero-description">{label_markup}{detail}</div>{heading_visual}</header>
 <div class="token-content token-flow"><aside class="token-aside"><p class="eyebrow">Details</p><dl><dt>ID</dt><dd><code>{esc(token_id)}</code></dd><dt>Jahrgang</dt><dd><a href="../">{year}</a></dd><dt>Kategorie</dt><dd><a href="../../categories/">{esc(category_name(db, category_id))} ({esc(category_id)})</a></dd><dt>Chiptyp</dt><dd>{esc(chip_type)}</dd></dl><a class="text-link" href="../../links/">Im Linkverzeichnis ansehen <span aria-hidden="true">→</span></a></aside>
 <section class="content-section nfc-section"><p class="eyebrow">Text auf dem Chip</p>{nfc_block}</section>
 <section class="content-section entries-section"><p class="eyebrow">Einträge</p><ul class="resource-list">{''.join(token_links) or '<li>Keine Einträge vorhanden.</li>'}</ul></section>
@@ -319,19 +349,34 @@ def render(out: Path, db: dict) -> None:
             target = out / relative
             target.parent.mkdir(parents=True, exist_ok=True)
             redirect = f'''<!doctype html>
-<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="refresh" content="0; url={esc(legacy_target)}"><link rel="canonical" href="{esc(legacy_target)}"><title>Adresse aktualisiert · De' nagh</title><link rel="icon" type="image/svg+xml" href="{depth_prefix}assets/favicon.svg"><link rel="stylesheet" href="{depth_prefix}assets/site.css"></head>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="refresh" content="0; url={esc(legacy_target)}"><link rel="canonical" href="{esc(legacy_target)}"><title>Adresse aktualisiert · De' nagh</title><link rel="icon" type="image/svg+xml" href="{depth_prefix}assets/favicon.svg"><link rel="stylesheet" href="{depth_prefix}assets/site.css?v={ASSET_VERSION}"></head>
 <body><a class="skip-link" href="#main">Zum Inhalt springen</a><main id="main" class="legacy-page">{legacy_body}</main></body></html>'''
             target.write_text(redirect, encoding="utf-8", newline="\n")
 
     rows = []
-    for link_id, link in links.items():
+    for link_id, link in public_links.items():
         url = link.get("url", "")
         parsed = urlparse(url)
         uses = token_usage.get(link_id, [])
-        used_tokens = ", ".join(token_id for token_id, _ in sorted(uses)) or "—"
-        used_years = ", ".join(str(year) for year in sorted({int(token["year"]) for _, token in uses})) or "—"
-        used_cats = sorted({category_name(db, token["categoryId"]) for _, token in uses})
+        sorted_uses = sorted(uses)
+        used_tokens = ", ".join(token_id for token_id, _ in sorted_uses) or "—"
+        token_links = ", ".join(token_reference(token_id, token) for token_id, token in sorted_uses) or "—"
+        used_labels = ", ".join(label for _, token in sorted_uses if (label := short_label(token)))
+        used_labels_markup = f'<small class="token-label-values">{esc(used_labels)}</small>' if used_labels else ""
+        years_used = sorted({int(token["year"]) for _, token in uses})
+        used_years = ", ".join(str(year) for year in years_used) or "—"
+        year_links = ", ".join(f'<a href="../{year}/">{year}</a>' for year in years_used) or "—"
+        categories_used = {
+            token["categoryId"]: category_name(db, token["categoryId"])
+            for _, token in uses
+        }
+        sorted_categories = sorted(categories_used.items(), key=lambda item: item[1].casefold())
+        used_cats = [label for _, label in sorted_categories]
         category_labels = ", ".join(used_cats) or "—"
+        category_links = ", ".join(
+            f'<a href="../categories/#category-{esc(category_id)}">{esc(label)}</a>'
+            for category_id, label in sorted_categories
+        ) or "—"
         description = localized(link.get("descriptions", {})) or "Noch keine Beschreibung eingetragen."
         effective_cats = effective_link_categories(db, link_id, link)
         pills = " ".join(
@@ -341,14 +386,14 @@ def render(out: Path, db: dict) -> None:
         row = f'''<tr data-token="{esc(used_tokens.lower())}" data-year="{esc(used_years)}" data-category="{esc(category_labels.lower())}">
   <td><a class="url-value" href="{esc(url)}">{esc(url)}</a>{f'<div class="tag-list">{pills}</div>' if pills else ''}</td>
   <td>{esc(description)}</td>
-  <td><span class="sort-value">{esc(used_tokens)}</span></td>
-  <td><span class="sort-value">{esc(used_years)}</span></td>
-  <td><span class="sort-value">{esc(category_labels)}</span></td>
+  <td><span class="sort-value">{token_links}</span>{used_labels_markup}</td>
+  <td><span class="sort-value">{year_links}</span></td>
+  <td><span class="sort-value">{category_links}</span></td>
 </tr>'''
         rows.append((used_tokens.casefold(), row))
     link_rows = "".join(row for _, row in sorted(rows, key=lambda item: item[0]))
     token_word = "Datenstein" if len(tokens) == 1 else "Datensteine"
-    links_content = f'''<header class="page-heading links-page-heading"><h1>Verwendete Links</h1><p>Diese Übersicht sammelt die Ziel-URLs, die in den NFC-Datensteinen verwendet werden, und zeigt ihre Zuordnung zu Datensteinen und Jahrgängen.</p><p class="count-label">{len(links)} URLs · {len(tokens)} {token_word} in der Quelldatenbank</p></header>
+    links_content = f'''<header class="page-heading links-page-heading"><h1>Verwendete Links</h1><p>Diese Übersicht sammelt externe Ziel-URLs, die in den NFC-Datensteinen verwendet werden, und zeigt ihre Zuordnung zu Datensteinen und Jahrgängen.</p><p class="count-label">{len(public_links)} URLs · {len(tokens)} {token_word} in der Quelldatenbank</p></header>
 <section class="section-block"><div class="table-wrap"><table id="links-table"><caption class="visually-hidden">Linkziele mit zugehörigen Datensteinen, Jahrgängen und Kategorien</caption><thead><tr><th scope="col">Ziel-URL</th><th scope="col">Beschreibung</th><th scope="col" data-sort-column="token" aria-sort="ascending"><span class="sortable-heading"><a href="../tokens/">Datenstein</a><span class="sort-arrows"><button class="sort-button" type="button" data-sort="token" data-direction="ascending" aria-label="Aufsteigend nach Datenstein sortieren" aria-pressed="true" hidden>▲</button><button class="sort-button" type="button" data-sort="token" data-direction="descending" aria-label="Absteigend nach Datenstein sortieren" aria-pressed="false" hidden>▼</button></span></span></th><th scope="col" data-sort-column="year"><span class="sortable-heading"><a href="../years/">Jahrgang</a><span class="sort-arrows"><button class="sort-button" type="button" data-sort="year" data-direction="ascending" aria-label="Aufsteigend nach Jahrgang sortieren" aria-pressed="false" hidden>▲</button><button class="sort-button" type="button" data-sort="year" data-direction="descending" aria-label="Absteigend nach Jahrgang sortieren" aria-pressed="false" hidden>▼</button></span></span></th><th scope="col" data-sort-column="category"><span class="sortable-heading"><a href="../categories/">Kategorie</a><span class="sort-arrows"><button class="sort-button" type="button" data-sort="category" data-direction="ascending" aria-label="Aufsteigend nach Kategorie sortieren" aria-pressed="false" hidden>▲</button><button class="sort-button" type="button" data-sort="category" data-direction="descending" aria-label="Absteigend nach Kategorie sortieren" aria-pressed="false" hidden>▼</button></span></span></th></tr></thead><tbody>{link_rows}</tbody></table></div><p class="visually-hidden" id="sort-status" aria-live="polite"></p><noscript><p class="footnote">Die Linkliste ist statisch nach Datenstein sortiert. Sortierfunktionen benötigen JavaScript.</p></noscript></section>'''
     write_page(out, "links/index.html", "Verwendete Links", "Übersicht der in NFC-Datensteinen verwendeten Linkziele.", links_content, sort_links=True)
 
@@ -359,12 +404,12 @@ def render(out: Path, db: dict) -> None:
         label = category.get("labels", {}).get("de") or category_id
         category_description = localized(category.get("descriptions", {}))
         members = []
-        for link_id, link in links.items():
+        for link_id, link in public_links.items():
             if category_id not in effective_link_categories(db, link_id, link):
                 continue
             uses = token_usage.get(link_id, [])
             token_refs = ", ".join(
-                f'<a href="../../../{esc(token["year"])}/{esc(token_id)}/">{esc(token_id)}</a>'
+                f'<a href="../../../{esc(token["year"])}/{esc(token_id)}/">{esc(token_id + (" · " + short_label(token) if short_label(token) else ""))}</a>'
                 for token_id, token in sorted(uses)
             ) or "Noch keinem Datenstein zugeordnet."
             description = localized(link.get("descriptions", {})) or "Noch keine Beschreibung eingetragen."
@@ -468,7 +513,7 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; line-heig
 .section-block { padding: 3.2rem 0; }
 .home-dashboard { padding: 2.5rem 0 4rem; }
 .home-dashboard > .section-heading { margin-bottom: 1.2rem; }
-.home-dashboard > .section-heading h2 { margin: .1rem 0; font-size: 2.2rem; }
+.home-dashboard > .section-heading h2 { margin: .1rem 0; color: var(--identity-accent); font-size: 2.2rem; }
 .overview-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .8rem; }
 .overview-stat { display: flex; flex-direction: column; gap: .45rem; min-height: 8rem; padding: 1.1rem; border: 1px solid var(--line); background: var(--panel); color: var(--text); text-decoration: none; }
 .overview-stat:hover { border-color: var(--accent); background: var(--panel-raised); }
@@ -478,11 +523,15 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; line-heig
 .overview-breakdown { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3rem; margin-top: 2.8rem; }
 .overview-breakdown .section-heading, .overview-token-section .section-heading { align-items: baseline; margin-bottom: .6rem; }
 .overview-breakdown h3, .overview-token-section h3 { margin: 0; color: var(--identity-accent); font-family: Georgia, "Times New Roman", serif; font-size: 1.5rem; font-weight: 500; }
-.overview-token-section h3 a { color: inherit; text-decoration: none; }
-.overview-token-section h3 a:hover { color: var(--accent-soft); text-decoration: underline; }
+.overview-breakdown h3 a, .overview-token-section h3 a { color: inherit; text-decoration: none; }
+.overview-breakdown h3 a:hover, .overview-token-section h3 a:hover { color: var(--accent-soft); text-decoration: underline; }
 .overview-list { margin: 0; padding: 0; list-style: none; }
 .overview-list li { border-bottom: 1px solid var(--line); }
 .overview-token-section #home-token-list > li:last-child { border-bottom: 0; }
+.overview-token-section #home-token-list { display: grid; gap: .55rem; }
+.overview-token-section #home-token-list > li { border: 0; background: var(--panel); }
+.overview-token-section #home-token-list > li > a { padding: .95rem 1rem; }
+.overview-token-section #home-token-list > li > a:hover { background: var(--panel-raised); }
 .overview-list a { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .85rem .2rem; color: var(--text); text-decoration: none; }
 .overview-list a:hover { color: var(--accent-soft); }
 .overview-list a > span:last-child { color: var(--muted); font-size: .88rem; text-align: right; }
@@ -497,6 +546,8 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; line-heig
 .record-card strong { font-family: Georgia, serif; font-size: 1.7rem; font-weight: 500; }
 .record-card > span:last-child { color: var(--muted); }
 .record-card .eyebrow { color: var(--accent-soft); font-size: .7rem; }
+.token-card-short-label, .year-card-short-label { color: var(--identity-accent); font-weight: 650; }
+.token-label-values { display: block; color: var(--muted); }
 .year-token-card { display: grid; grid-template-columns: auto minmax(8rem, 1fr) auto; align-items: center; gap: 1rem; }
 .year-card-seal { position: relative; display: grid; place-items: center; width: 5.5rem; aspect-ratio: 1; border: 1px solid var(--accent); color: var(--identity-accent); clip-path: polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%); }
 .year-card-seal::before { position: absolute; inset: .35rem; border: 1px solid var(--line); content: ""; clip-path: polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%); }
@@ -555,6 +606,8 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; line-heig
 .token-heading h1 { margin-bottom: .3rem; font-size: clamp(3.2rem, 9vw, 6rem); }
 .token-heading .lead { margin: .4rem 0 0; color: var(--muted); font-size: 1.2rem; }
 .token-hero-description { width: 100%; color: var(--text); font-size: 1.08rem; line-height: 1.65; text-align: center; }
+.token-hero-short-label { margin: 0 0 .45rem; color: var(--identity-accent); font-family: Georgia, "Times New Roman", serif; font-size: 1.2rem; }
+.token-description { margin: 0; }
 .token-hero-description .empty-state { padding: 0; border: 0; color: var(--muted); background: transparent; }
 .token-seal { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: clamp(7rem, 20vw, 10.8rem); aspect-ratio: 1; flex: 0 0 auto; border: 1px solid var(--accent); color: var(--accent-soft); clip-path: polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%); }
 .token-seal::before { position: absolute; inset: .45rem; border: 1px solid var(--line); content: ""; clip-path: polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%); }
