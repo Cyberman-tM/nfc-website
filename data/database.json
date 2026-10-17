@@ -55,6 +55,24 @@
         "de": "Facebook",
         "en": "Facebook"
       }
+    },
+    "discord": {
+      "labels": {
+        "de": "Discord",
+        "en": "Discord"
+      }
+    },
+    "wiki": {
+      "labels": {
+        "de": "Wiki",
+        "en": "Wiki"
+      }
+    },
+    "verlag": {
+      "labels": {
+        "de": "Verlag",
+        "en": "Publisher"
+      }
     }
   },
   "categoryRules": [
@@ -79,6 +97,29 @@
         "matchesAny": [
           "facebook.com",
           "www.facebook.com"
+        ]
+      }
+    },
+    {
+      "linkCategoryId": "discord",
+      "appliesTo": "link",
+      "condition": {
+        "field": "url.hostname",
+        "matchesAny": [
+          "discord.gg",
+          "discord.com",
+          "www.discord.com"
+        ]
+      }
+    },
+    {
+      "linkCategoryId": "wiki",
+      "appliesTo": "link",
+      "condition": {
+        "field": "url.hostname",
+        "matchesAny": [
+          "klingon.wiki",
+          "www.klingon.wiki"
         ]
       }
     },
@@ -155,7 +196,9 @@
     "discord-invite": {
       "url": "https://discord.gg/NrUhpvb",
       "categories": [],
-      "descriptions": {}
+      "descriptions": {
+        "de": "Einladungslink zum 'Klingonisch-Stammtisch'"
+      }
     },
     "klingonisch-de": {
       "url": "https://klingonisch.de",
@@ -199,7 +242,7 @@
     },
     "egpyt": {
       "url": "http://www.egpyt.de/",
-      "categories": [],
+      "categories": ["verlag"],
       "descriptions": {}
     },
     "youtube-klingonteacher": {
