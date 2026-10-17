@@ -102,6 +102,46 @@
       "categories": [],
       "descriptions": {}
     },
+    "nfc-dnf03": {
+      "url": "https://nfc.tlhIngan.at/2026/DnF03",
+      "categories": [],
+      "descriptions": {}
+    },
+    "tlhingan-at": {
+      "url": "https://tlhingan.at/",
+      "categories": [],
+      "descriptions": {}
+    },
+    "scrabble-tlhingan-at": {
+      "url": "https://scrabble.tlhIngan.at/",
+      "categories": [],
+      "descriptions": {}
+    },
+    "quja-tlhingan-at": {
+      "url": "https://quja.tlhIngan.at/",
+      "categories": [],
+      "descriptions": {}
+    },
+    "be-tlhingan-at": {
+      "url": "https://be.tlhIngan.at/",
+      "categories": [],
+      "descriptions": {}
+    },
+    "sfa-tlhingan-at": {
+      "url": "https://sfa.tlhIngan.at/",
+      "categories": [],
+      "descriptions": {}
+    },
+    "svb-tlhingan-at": {
+      "url": "https://svb.tlhIngan.at/",
+      "categories": [],
+      "descriptions": {}
+    },
+    "youtube-christophalexander4542": {
+      "url": "https://www.youtube.com/@christophalexander4542/videos",
+      "categories": ["channel"],
+      "descriptions": {}
+    },
     "youtube-payqaghtlhingan": {
       "url": "https://www.youtube.com/@payqaghtlhingan",
       "categories": ["channel"],
@@ -187,27 +227,22 @@
     "DnF01": {
       "year": 2026,
       "categoryId": "F",
+      "designs": [
+        {
+          "id": "Design01",
+          "name": "Design 1",
+          "altTexts": {
+            "model": { "de": "Interaktive 3D-Ansicht des Datensteins DnF01.", "en": "Interactive 3D view of data stone DnF01." },
+            "front": { "de": "Vorderseite des Datensteins DnF01 mit klingonischem Schriftzug und NFC-Symbol.", "en": "Front of data stone DnF01, with Klingon lettering and an NFC symbol." },
+            "back": { "de": "Rückseite des Datensteins DnF01 mit Hutmotiv.", "en": "Back of data stone DnF01, featuring a hat design." }
+          }
+        }
+      ],
       "shortLabel": {
         "de": "Datenstein Peter"
       },
       "chipType": "NXP NTAG216",
       "descriptions": {},
-      "media": {
-        "altTexts": {
-          "model": {
-            "de": "Interaktive 3D-Ansicht des Datensteins DnF01.",
-            "en": "Interactive 3D view of data stone DnF01."
-          },
-          "front": {
-            "de": "Vorderseite des Datensteins DnF01 mit klingonischem Schriftzug und NFC-Symbol.",
-            "en": "Front of data stone DnF01, with Klingon lettering and an NFC symbol."
-          },
-          "back": {
-            "de": "Rückseite des Datensteins DnF01 mit Hutmotiv.",
-            "en": "Back of data stone DnF01, featuring a hat design."
-          }
-        }
-      },
       "legacyIds": [
         "DnF001"
       ],
@@ -231,6 +266,17 @@
     "DnF02": {
       "year": 2026,
       "categoryId": "F",
+      "designs": [
+        {
+          "id": "Design01",
+          "name": "Design 1",
+          "altTexts": {
+            "model": { "de": "Interaktive 3D-Ansicht des Datensteins DnF02.", "en": "Interactive 3D view of data stone DnF02." },
+            "front": { "de": "Vorderseite des achteckigen, bronzegoldenen Datensteins DnF02 mit Klingonisch-Signet und NFC-Symbol.", "en": "Front of the bronze-gold octagonal data stone DnF02, with a Klingon insignia and NFC symbol." },
+            "back": { "de": "Rückseite des bronzegoldenen Datensteins DnF02 mit dunklem, geflügeltem Emblem.", "en": "Back of the bronze-gold data stone DnF02, with a dark winged emblem." }
+          }
+        }
+      ],
       "chipType": "NXP NTAG216",
       "shortLabel": {
         "de": "Datenstein Lieven"
@@ -241,22 +287,6 @@
         "descriptions": {}
       },
       "descriptions": {},
-      "media": {
-        "altTexts": {
-          "model": {
-            "de": "Interaktive 3D-Ansicht des Datensteins DnF02.",
-            "en": "Interactive 3D view of data stone DnF02."
-          },
-          "front": {
-            "de": "Vorderseite des achteckigen, bronzegoldenen Datensteins DnF02 mit Klingonisch-Signet und NFC-Symbol.",
-            "en": "Front of the bronze-gold octagonal data stone DnF02, with a Klingon insignia and NFC symbol."
-          },
-          "back": {
-            "de": "Rückseite des bronzegoldenen Datensteins DnF02 mit dunklem, geflügeltem Emblem.",
-            "en": "Back of the bronze-gold data stone DnF02, with a dark winged emblem."
-          }
-        }
-      },
       "links": [
         "nfc-dnf02",
         "qephom",
@@ -269,6 +299,39 @@
         "facebook-dki",
         "youtube-playlist-tt43a9uiyq8",
         "youtube-playlist-foflnx-mhdg"
+      ]
+    },
+    "DnF03": {
+      "year": 2026,
+      "categoryId": "F",
+      "designs": [
+        {
+          "id": "Design01",
+          "name": "Omega and Alpha",
+          "altTexts": {
+            "model": { "de": "Interaktive 3D-Ansicht des Datensteins DnF03." },
+            "front": { "de": "Vorderseite des Datensteins DnF03." },
+            "back": { "de": "Rückseite des Datensteins DnF03." }
+          }
+        }
+      ],
+      "chipType": "NXP NTAG216",
+      "shortLabel": { "de": "reyutqa' lupeQ" },
+      "nfcText": {
+        "originalLanguage": "tlh",
+        "original": "reyutqa' lupeQ jIH.\nyItIv!\nlatlh De': nfc.tlhIngan.at/2026/DnF03",
+        "descriptions": {}
+      },
+      "descriptions": {},
+      "links": [
+        "nfc-dnf03",
+        "tlhingan-at",
+        "scrabble-tlhingan-at",
+        "quja-tlhingan-at",
+        "be-tlhingan-at",
+        "sfa-tlhingan-at",
+        "svb-tlhingan-at",
+        "youtube-christophalexander4542"
       ]
     }
   }

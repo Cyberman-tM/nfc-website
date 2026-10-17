@@ -4,6 +4,7 @@ Statische, mehrsprachige Dokumentationswebsite für NFC-Datensteine (De' nagh).
 
 - [Projekt- und Architekturleitfaden](PROJECT.md)
 - [Quelldaten und Datenbankschema](data/README.md)
+- [Vorlage für neue Datensteine](templates/Datenstein/README.md)
 
 ## Vorschau erzeugen
 

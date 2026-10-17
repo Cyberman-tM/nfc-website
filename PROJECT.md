@@ -26,7 +26,7 @@ Der Jahrgang bezeichnet den Stand im Zyklus zwischen den jährlichen qepHoms (Tr
 - Die ID identifiziert einen Datenstein, nicht einen einzelnen physischen Chip. Mehrere physische Exemplare desselben Datensteins dürfen dieselbe ID und URL verwenden.
 - Für den aktuellen Jahrgang sind zunächst Kategorien `0` (Allgemein) und `F` (Freiform) vorgesehen. Freiform umfasst Datensteine, die sich nicht in die anderen Kategorien einordnen lassen, sowie Datensteine, die für andere erstellt wurden. Kategorien `1` bis `E` werden für spätere Jahrgänge gesammelt.
 - Kategorie `0` (Allgemein) ist für Datensteine ohne spezialisierten Inhalt gedacht, die eine Übersicht über alle Themen darstellen.
-- Es ist noch offen, ob unterschiedliche Designs mit gleichem Inhalt eigene Dn-IDs bekommen und wie solche Varianten intern verknüpft werden. Die bevorzugte Richtung ist, für jedes Design einen eigenen Datenstein-Link zu haben; die Entscheidung steht aus.
+- Die Dn-ID identifiziert den Inhalt, nicht das Design. Mehrere Designs desselben Inhalts teilen deshalb dieselbe Dn-ID und Detailseite. Die Varianten erhalten pro Dn-ID fortlaufende Design-IDs (`Design01`, `Design02` usw.) und separat gepflegte Namen. Design-IDs sind mindestens zweistellig; bei Bedarf sind `Design100` und höhere IDs möglich. Eine kombinierte ID wird nicht gespeichert.
 - Ein Wechsel des NFC-Chiptyps soll nach aktueller Planung eine neue Dn-ID erhalten: Ein neuer Chiptyp wäre Teil eines neu entworfenen beziehungsweise verbesserten Tokens und damit effektiv ein neuer Datenstein.
 
 ## URL-Struktur
@@ -54,7 +54,7 @@ URLs aus veröffentlichten Seiten und auf NFC-Tags sind dauerhaft zu erhalten. B
 - `shortLabel` enthält eine kurze interne Bezeichnung, die auf Datenstein-Detailseiten und in Auflistungen neben der ausführlichen Beschreibung hilft, einen Datenstein schnell zu erkennen. Das Feld ist nach Sprache lokalisiert.
 - Im NFC-Tag steht zuerst ein kurzer Texteinsatz, der die URL als Text enthält, danach der explizite URL-Eintrag. Ein Android-Test zeigte, dass die Übersicht nur dann angezeigt wurde, wenn der Texteinsatz zuerst kommt. Diese Reihenfolge ist eine praktische Vorgabe aus dem Test.
 - NFCTools-JSON-Exporte sind Referenz-/Quelldaten und können je Datenstein-ID im Repository abgelegt werden. Ihr Format ist nicht das verbindliche Website-Datenbankschema und kann sich noch ändern.
-- Mehrere physische Exemplare mit demselben Inhalt und Design können dieselbe Dn-ID haben. Ob gleiche Inhalte mit unterschiedlichen Designs eigene IDs bekommen, ist noch offen. Der Nutzer tendiert zu einem eigenen Datenstein-Link je Design.
+- Mehrere physische Exemplare mit demselben Inhalt teilen dieselbe Dn-ID, unabhängig vom Design. Auf der gemeinsamen Datensteinseite kann zwischen den Designs gewechselt werden.
 - Auf Token-Seiten sind sichtbare Verweise auf Datensteine mit gleichem Inhalt oder gleichem Design erwünscht. Eine kompakte Infobox oder ein Abschnitt „Verwandte Datensteine“ ist eine mögliche Darstellung; Datenbankschema und genaue Darstellung sind offen.
 - Der Chiptyp wird im Feld `chipType` geführt; für nicht einzeln festgelegte Datensteine gilt der Datenbankstandard `defaultChipType`. Aktuell verwenden alle Datensteine `NXP NTAG216`; frühestens 2027 könnte sich das ändern. Ein anderer Chiptyp soll voraussichtlich als neuer Datenstein mit neuer ID behandelt werden.
 
@@ -104,7 +104,7 @@ Die Infobox selbst behält ihre vorhandene Fläche und Umrandung; nur ihre Über
 - Die Infobox heißt „Details“ und beginnt auf gleicher Höhe wie der Bereich „Text auf dem Chip“. Sie behält ihre dunkle Fläche und Umrandung; ihre Überschrift verwendet die Markenfarbe.
 - „Text auf dem Chip“ ist ein fester, oberer Inhaltsbereich und nimmt die verfügbare Textbreite ein. Die durchgehende Linie darunter trennt diesen oberen Bereich von den variablen Einträgen; zwischen Beschreibung und Chiptext gibt es keine Trennlinie.
 - „Einträge“ ist der erste variable Inhaltsbereich. Auf breiten Ansichten umfließt dieser Block die seitlich stehende Infobox, sodass er zunächst die freie linke Fläche nutzt und nach dem Ende der Infobox die volle Breite einnimmt (L-förmiger Textfluss). Der freie Platz unterhalb der Infobox wird dadurch nicht dauerhaft blockiert.
-- Auf schmalen Ansichten werden die Bereiche ohne feste Seitenbreite untereinander angeordnet; die Lesereihenfolge bleibt Beschreibung, Chiptext, Details, Einträge.
+- Auf schmalen Ansichten werden die Bereiche ohne feste Seitenbreite untereinander angeordnet; die Lesereihenfolge ist Beschreibung, Chiptext, Einträge, Details.
 - Diese Anordnung ist die festgelegte Grundgestaltung. Kleinere visuelle Anpassungen sind möglich, sollen aber die Hierarchie und Reihenfolge nicht ohne erneute Abstimmung verändern.
 
 ### Jahrgangsübersicht
@@ -158,7 +158,7 @@ Die Infobox selbst behält ihre vorhandene Fläche und Umrandung; nur ihre Über
 
 ## Bilder und Token-Varianten
 
-Ein Datenstein kann eine achteckige Münze mit wiederkehrendem Design auf einer Seite und unterschiedlichen Designs auf der anderen Seite sein. Eine Galerie von Vorder-/Rückseiten oder Varianten ist vorgesehen, falls sie zum endgültigen ID-Modell passt. Gemeinsamen Text nicht allein zur Vermeidung kleiner Wiederholungen zentralisieren.
+Ein Datenstein kann mehrere Designs haben. Gestaltung und Medien liegen pro Design getrennt unter `3d/<Dn-ID>/<Design-ID>/`; gemeinsame Inhaltsdaten bleiben einmal am Datenstein-Datensatz. Die Detailseite ermöglicht den Wechsel zwischen Varianten.
 
 ## Build- und Änderungsregeln
 
@@ -176,7 +176,7 @@ Diese Punkte bei Datenänderungen weiterhin gegen die Inhaltsdatenbank und die e
 - Kategorie `F` ist als `Freiform` festgelegt. Die Definition soll sowohl nicht anderweitig einordenbare Datensteine als auch für andere erstellte Datensteine umfassen.
 - `data/database.json` führt aktuell nur `de` und `en` als unterstützte Sprachen; `tlh` ist geplant, aber noch nicht als veröffentlichte Übersetzung festgelegt.
 - Die Kategorie-Regel für F, Tokenbeschreibungen und Linkbeschreibungen sind noch zu prüfen und gegebenenfalls zu ergänzen.
-- DnF02 ist für den Jahrgang 2026 in Kategorie F eingetragen. Das GLB-Modell und beide Ansichten sind erzeugt. Der NFCTools-Export liegt unter `data/nfctools/DnF02.json`; NFC-Text und Linkziele daraus sind in `database.json` übernommen. Die ausführliche Beschreibung ist noch offen.
+- DnF02 ist für den Jahrgang 2026 in Kategorie F eingetragen. Das GLB-Modell und beide Ansichten liegen in `3d/DnF02/Design01/`. Der NFCTools-Export liegt unter `data/nfctools/DnF02.json`; NFC-Text und Linkziele daraus sind in `database.json` übernommen. Die ausführliche Beschreibung ist noch offen.
 - Die ID `DnF001` ist falsch formatiert; gültig ist `DnF01`. `DnF001` wurde tatsächlich auf einem NFC-Tag verwendet und muss daher als dauerhafte Weiterleitung auf `DnF01` erhalten bleiben.
 - Die Jahrgangsgrenze ist festgelegt: Alles vor dem jeweiligen November-qepHom gehört zu diesem qepHom-Jahrgang, alles danach zum nächsten.
 

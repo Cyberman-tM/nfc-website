@@ -1,0 +1,130 @@
+{
+  "ntgui_version": 18,
+  "data": [
+    {
+      "kRecordDescription": "reyutqa' lupeQ jIH.\nyItIv!\nlatlh De': nfc.tlhIngan.at/2026/DnF03",
+      "kRecordSelection": 0,
+      "kRecordField1": "reyutqa' lupeQ jIH.\nyItIv!\nlatlh De': nfc.tlhIngan.at/2026/DnF03",
+      "kRecordSize": 67,
+      "kRecordObject": {
+        "kTnf": 1,
+        "kChunked": false,
+        "kType": [84],
+        "kId": [],
+        "kPayload": [2,101,110,114,101,121,117,116,113,97,39,32,108,117,112,101,81,32,106,73,72,46,10,121,73,116,73,118,33,10,108,97,116,108,104,32,68,101,39,58,32,110,102,99,46,116,108,104,73,110,103,97,110,46,97,116,47,50,48,50,54,47,68,110,70,48,51]
+      }
+    },
+    {
+      "kRecordDescription": "https://nfc.tlhIngan.at/2026/DnF03",
+      "kRecordField2": "nfc.tlhIngan.at/2026/DnF03",
+      "kRecordSelection": 1,
+      "kRecordField1": "https://",
+      "kRecordSize": 27,
+      "kRecordObject": {
+        "kTnf": 1,
+        "kChunked": false,
+        "kType": [85],
+        "kId": [],
+        "kPayload": [4,110,102,99,46,116,108,104,73,110,103,97,110,46,97,116,47,50,48,50,54,47,68,110,70,48,51]
+      }
+    },
+    {
+      "kRecordDescription": "https://tlhingan.at/",
+      "kRecordField2": "tlhingan.at/",
+      "kRecordSelection": 1,
+      "kRecordField1": "https://",
+      "kRecordSize": 13,
+      "kRecordObject": {
+        "kTnf": 1,
+        "kChunked": false,
+        "kType": [85],
+        "kId": [],
+        "kPayload": [4,116,108,104,105,110,103,97,110,46,97,116,47]
+      }
+    },
+    {
+      "kRecordDescription": "https://scrabble.tlhIngan.at/",
+      "kRecordField2": "scrabble.tlhIngan.at/",
+      "kRecordSelection": 1,
+      "kRecordField1": "https://",
+      "kRecordSize": 22,
+      "kRecordObject": {
+        "kTnf": 1,
+        "kChunked": false,
+        "kType": [85],
+        "kId": [],
+        "kPayload": [4,115,99,114,97,98,98,108,101,46,116,108,104,73,110,103,97,110,46,97,116,47]
+      }
+    },
+    {
+      "kRecordDescription": "https://quja.tlhIngan.at/",
+      "kRecordField2": "quja.tlhIngan.at/",
+      "kRecordSelection": 1,
+      "kRecordField1": "https://",
+      "kRecordSize": 18,
+      "kRecordObject": {
+        "kTnf": 1,
+        "kChunked": false,
+        "kType": [85],
+        "kId": [],
+        "kPayload": [4,113,117,106,97,46,116,108,104,73,110,103,97,110,46,97,116,47]
+      }
+    },
+    {
+      "kRecordDescription": "https://be.tlhIngan.at/",
+      "kRecordField2": "be.tlhIngan.at/",
+      "kRecordSelection": 1,
+      "kRecordField1": "https://",
+      "kRecordSize": 16,
+      "kRecordObject": {
+        "kTnf": 1,
+        "kChunked": false,
+        "kType": [85],
+        "kId": [],
+        "kPayload": [4,98,101,46,116,108,104,73,110,103,97,110,46,97,116,47]
+      }
+    },
+    {
+      "kRecordDescription": "https://sfa.tlhIngan.at/",
+      "kRecordField2": "sfa.tlhIngan.at/",
+      "kRecordSelection": 1,
+      "kRecordField1": "https://",
+      "kRecordSize": 17,
+      "kRecordObject": {
+        "kTnf": 1,
+        "kChunked": false,
+        "kType": [85],
+        "kId": [],
+        "kPayload": [4,115,102,97,46,116,108,104,73,110,103,97,110,46,97,116,47]
+      }
+    },
+    {
+      "kRecordDescription": "https://svb.tlhIngan.at/",
+      "kRecordField2": "svb.tlhIngan.at/",
+      "kRecordSelection": 1,
+      "kRecordField1": "https://",
+      "kRecordSize": 17,
+      "kRecordObject": {
+        "kTnf": 1,
+        "kChunked": false,
+        "kType": [85],
+        "kId": [],
+        "kPayload": [4,115,118,98,46,116,108,104,73,110,103,97,110,46,97,116,47]
+      }
+    },
+    {
+      "kRecordDescription": "https://www.youtube.com/@christophalexander4542/videos",
+      "kRecordField2": "youtube.com/@christophalexander4542/videos",
+      "kRecordSelection": 1,
+      "kRecordField1": "https://www.",
+      "kRecordSize": 43,
+      "kRecordObject": {
+        "kTnf": 1,
+        "kChunked": false,
+        "kType": [85],
+        "kId": [],
+        "kPayload": [2,121,111,117,116,117,98,101,46,99,111,109,47,64,99,104,114,105,115,116,111,112,104,97,108,101,120,97,110,100,101,114,52,53,52,50,47,118,105,100,101,111,115]
+      }
+    }
+  ]
+}

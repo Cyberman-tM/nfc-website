@@ -25,7 +25,7 @@ def esc(value: object) -> str:
     return html.escape(str(value), quote=True)
 
 
-def write_page(out: Path, relative: str, title: str, description: str, body: str, *, sort_links: bool = False, token_viewer: bool = False) -> None:
+def write_page(out: Path, relative: str, title: str, description: str, body: str, *, sort_links: bool = False, token_viewer: bool = False, design_picker: bool = False) -> None:
     relative_path = Path(relative)
     depth = len(relative_path.parent.parts) if relative_path.parent != Path(".") else 0
     prefix = "../" * depth or "./"
@@ -37,6 +37,8 @@ def write_page(out: Path, relative: str, title: str, description: str, body: str
             '<script type="module" async src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js"></script>',
             f'<script src="{prefix}assets/token-viewer.js" defer></script>',
         ])
+    if design_picker:
+        extra_scripts.append(f'<script src="{prefix}assets/design-picker.js" defer></script>')
     page = f'''<!doctype html>
 <html lang="de">
 <head>
@@ -104,35 +106,43 @@ def token_reference(token_id: str, token: dict) -> str:
     return f'<a href="../{esc(token["year"])}/{esc(token_id)}/"{attributes}>{esc(token_id)}</a>'
 
 
-def copy_token_media(token_id: str, out: Path) -> dict[str, bool]:
-    """Publish only the named GLB and fallback images; never copy Blender/STL sources."""
-    source = ROOT / "3d" / token_id
-    target = out / "media" / token_id
-    files = {
-        "model": f"{token_id}.glb",
-        "front": f"{token_id}_vorne.webp",
-        "back": f"{token_id}_hinten.webp",
-    }
-    found = {kind: (source / filename).is_file() for kind, filename in files.items()}
-    if any(found.values()):
-        target.mkdir(parents=True, exist_ok=True)
-        for kind, filename in files.items():
-            if found[kind]:
-                shutil.copyfile(source / filename, target / filename)
-    return found
+def copy_token_media(token_id: str, token: dict, out: Path) -> list[dict]:
+    """Publish each design's named GLB and fallback images, never Blender/STL sources."""
+    designs = token_designs(token)
+    result = []
+    for design in designs:
+        design_id = design["id"]
+        source = ROOT / "3d" / token_id / design_id
+        target = out / "media" / token_id / design_id
+        files = {"model": f"{token_id}.glb", "front": f"{token_id}_vorne.webp", "back": f"{token_id}_hinten.webp"}
+        found = {kind: (source / filename).is_file() for kind, filename in files.items()}
+        if any(found.values()):
+            target.mkdir(parents=True, exist_ok=True)
+            for kind, filename in files.items():
+                if found[kind]:
+                    shutil.copyfile(source / filename, target / filename)
+        result.append({**design, **found})
+    return result
+
+
+def token_designs(token: dict) -> list[dict]:
+    """Return declared designs, accepting old records as a single Design01."""
+    designs = token.get("designs") or [{"id": "Design01", "name": "Design 1"}]
+    return sorted(designs, key=lambda design: int(re.fullmatch(r"Design(\d+)", design.get("id", "")).group(1)) if re.fullmatch(r"Design(\d+)", design.get("id", "")) else -1)
 
 
 def token_card(token_id: str, token: dict, context: str = "", href_target: str | None = None) -> str:
     """Render a linked visual card for a token in an index or year listing."""
-    alt_texts = token.get("media", {}).get("altTexts", {})
+    alt_texts = token_designs(token)[0].get("altTexts", token.get("media", {}).get("altTexts", {}))
     thumbnails = []
     for side, filename, fallback_alt, caption in (
         ("front", f"{token_id}_vorne.webp", f"Vorderseite des Datensteins {token_id}", "Vorderseite"),
         ("back", f"{token_id}_hinten.webp", f"Rückseite des Datensteins {token_id}", "Rückseite"),
     ):
-        if (ROOT / "3d" / token_id / filename).is_file():
+        design_id = token_designs(token)[0]["id"]
+        if (ROOT / "3d" / token_id / design_id / filename).is_file():
             alt = localized(alt_texts.get(side, {})) or fallback_alt
-            thumbnails.append(f'<figure><img src="../media/{esc(token_id)}/{esc(filename)}" alt="{esc(alt)}" width="512" height="512"><figcaption>{caption}</figcaption></figure>')
+            thumbnails.append(f'<figure><img src="../media/{esc(token_id)}/{esc(design_id)}/{esc(filename)}" alt="{esc(alt)}" width="512" height="512"><figcaption>{caption}</figcaption></figure>')
     gallery = f'<div class="year-card-gallery">{"".join(thumbnails)}</div>' if thumbnails else ""
     context_markup = f'<span class="eyebrow">{esc(context)}</span>' if context else ""
     label = short_label(token)
@@ -172,6 +182,14 @@ def validate(db: dict) -> None:
         for legacy_id in token.get("legacyIds", []):
             if not LEGACY_ID.fullmatch(legacy_id):
                 raise ValueError(f"Ungültige Legacy-ID bei {token_id}: {legacy_id!r}")
+        designs = token_designs(token)
+        design_ids = [design.get("id", "") for design in designs]
+        if len(set(design_ids)) != len(design_ids):
+            raise ValueError(f"Doppelte Design-ID bei {token_id}")
+        for design_id in design_ids:
+            match = re.fullmatch(r"Design(\d{2,})", design_id)
+            if not match or int(match.group(1)) == 0:
+                raise ValueError(f"Ungültige Design-ID bei {token_id}: {design_id!r}; erwartet Design01 oder höher")
 
 
 def render(out: Path, db: dict) -> None:
@@ -288,38 +306,47 @@ def render(out: Path, db: dict) -> None:
     for token_id, token in sorted(tokens.items()):
         year = int(token["year"])
         category_id = token["categoryId"]
-        media = copy_token_media(token_id, out)
-        media_root = f"../../media/{token_id}"
-        alt_texts = token.get("media", {}).get("altTexts", {})
-        figures = []
-        for side, filename, fallback_text in (
-            ("front", f"{token_id}_vorne.webp", f"Vorderseite des Datensteins {token_id}"),
-            ("back", f"{token_id}_hinten.webp", f"Rückseite des Datensteins {token_id}"),
-        ):
-            if media[side]:
-                alt = localized(alt_texts.get(side, {})) or fallback_text
-                caption = "Vorderseite" if side == "front" else "Rückseite"
-                figures.append(f'''<figure><img src="{media_root}/{esc(filename)}" alt="{esc(alt)}" width="512" height="512"><figcaption>{caption}</figcaption></figure>''')
-        fallback_gallery = "".join(figures) or '<p class="media-empty">Keine statischen Ansichten hinterlegt.</p>'
-        if media["model"]:
-            model_alt = localized(alt_texts.get("model", {})) or f"Interaktive 3D-Ansicht des Datensteins {token_id}; mit Maus oder Touch drehbar."
-            media_content = f'''<div class="model-stage">
-  <model-viewer class="data-stone-viewer" src="{media_root}/{token_id}.glb" alt="{esc(model_alt)}" camera-controls interaction-prompt="none" rotation-per-second="18deg" shadow-intensity="1" exposure="1" touch-action="pan-y" style="visibility:hidden" aria-hidden="true" inert></model-viewer>
-  <div class="viewer-fallback" id="viewer-fallback">{fallback_gallery}</div>
+        media = copy_token_media(token_id, token, out)
+        legacy_alt_texts = token.get("media", {}).get("altTexts", {})
+        design_views = []
+        for index, design in enumerate(media):
+            alt_texts = design.get("altTexts", legacy_alt_texts)
+            design_id = design["id"]
+            root = f"../../media/{token_id}/{design_id}"
+            front = f"{root}/{token_id}_vorne.webp" if design["front"] else ""
+            back = f"{root}/{token_id}_hinten.webp" if design["back"] else ""
+            name = design.get("name") or design_id
+            figures = []
+            for side, src, fallback_text, caption in (
+                ("front", front, f"Vorderseite des Datensteins {token_id}", "Vorderseite"),
+                ("back", back, f"Rückseite des Datensteins {token_id}", "Rückseite"),
+            ):
+                if src:
+                    alt = localized(alt_texts.get(side, {})) or fallback_text
+                    figures.append(f'<figure><img src="{esc(src)}" alt="{esc(alt)}" width="512" height="512"><figcaption>{caption}</figcaption></figure>')
+            gallery = "".join(figures) or '<p class="media-empty">Keine statischen Ansichten hinterlegt.</p>'
+            design_views.append({"id": design_id, "name": name, "root": root, "model": design["model"], "front": front, "back": back, "gallery": gallery})
+        first = design_views[0]
+        first_alt_texts = media[0].get("altTexts", legacy_alt_texts)
+        model_alt = localized(first_alt_texts.get("model", {})) or f"Interaktive 3D-Ansicht des Datensteins {token_id}; mit Maus oder Touch drehbar."
+        initial_model = f' src="{first["root"]}/{token_id}.glb"' if first["model"] else ""
+        model_markup = f'<model-viewer class="data-stone-viewer"{initial_model} alt="{esc(model_alt)}" camera-controls interaction-prompt="none" rotation-per-second="18deg" shadow-intensity="1" exposure="1" touch-action="pan-y" style="visibility:hidden" aria-hidden="true" inert></model-viewer>' if any(d["model"] for d in design_views) else ""
+        selectors = ""
+        if len(design_views) > 1:
+            options = "".join(f'<option value="{i}">{esc(d["name"])}</option>' for i, d in enumerate(design_views))
+            selectors = f'<div class="design-picker" id="design-picker" hidden><button type="button" data-design-step="-1" aria-label="Vorheriges Design">←</button><label>Design <select id="design-select">{options}</select></label><button type="button" data-design-step="1" aria-label="Nächstes Design">→</button><span id="design-count" aria-live="polite">1 von {len(design_views)}</span></div>'
+        media_content = f'''{selectors}<div class="model-stage model-stage-compact" data-designs="{esc(json.dumps(design_views, ensure_ascii=False))}">
+  {model_markup}
+  <div class="viewer-fallback" id="viewer-fallback">{first["gallery"]}</div>
 </div>
 <div class="viewer-controls viewer-controls-compact" id="viewer-controls" hidden><button class="motion-toggle" id="motion-toggle" type="button" aria-label="Animation starten" aria-pressed="false"><span class="motion-icon" aria-hidden="true"></span><span id="motion-label">Animation starten</span></button></div>
 <p class="viewer-status viewer-status-compact visually-hidden" id="viewer-status" role="status" aria-live="polite">Statische Ansicht. 3D-Modell wird geladen …</p>'''
-            media_content = media_content.replace('<div class="model-stage">', '<div class="model-stage model-stage-compact">')
+        if first["model"] or first["front"] or first["back"]:
             heading_visual = f'<div class="token-visual">{media_content}</div>'
             media_section = ""
-        elif figures:
-            media_content = f'<div class="viewer-fallback static-gallery">{fallback_gallery}</div>'
-            media_section = f'''<section class="content-section media-section"><p class="eyebrow">Gestaltung</p><h2>Ansichten und Varianten</h2>{media_content}</section>'''
-            heading_visual = ""
         else:
-            media_content = '<p class="empty-state">Für diesen Datenstein ist noch keine 3D-Datei oder Bildansicht hinterlegt.</p>'
-            media_section = f'''<section class="content-section media-section"><p class="eyebrow">Gestaltung</p><h2>Ansichten und Varianten</h2>{media_content}</section>'''
             heading_visual = ""
+            media_section = '<section class="content-section media-section"><p class="eyebrow">Gestaltung</p><h2>Ansichten und Varianten</h2><p class="empty-state">Für diesen Datenstein ist noch keine 3D-Datei oder Bildansicht hinterlegt.</p></section>'
         token_links = []
         for link_id in token.get("links", []):
             link = links[link_id]
@@ -339,7 +366,7 @@ def render(out: Path, db: dict) -> None:
 <section class="content-section nfc-section"><p class="eyebrow">Text auf dem Chip</p>{nfc_block}</section>
 <section class="content-section entries-section"><p class="eyebrow">Einträge</p><ul class="resource-list">{''.join(token_links) or '<li>Keine Einträge vorhanden.</li>'}</ul></section>
 {media_section}</div>'''
-        write_page(out, f"{year}/{token_id}/index.html", token_id, f"Dokumentation für Datenstein {token_id}, Jahrgang {year}.", body, token_viewer=media["model"])
+        write_page(out, f"{year}/{token_id}/index.html", token_id, f"Dokumentation für Datenstein {token_id}, Jahrgang {year}.", body, token_viewer=any(d["model"] for d in media), design_picker=len(media) > 1)
         for legacy_id in token.get("legacyIds", []):
             legacy_target = f"../{token_id}/"
             legacy_body = f'''<header class="page-heading"><p class="eyebrow">Frühere Adresse</p><h1>{esc(legacy_id)}</h1><p>Diese Adresse wurde früher verwendet. Der Datenstein ist jetzt unter <a href="{esc(legacy_target)}">{esc(token_id)}</a> dokumentiert.</p></header>
@@ -430,6 +457,7 @@ def render(out: Path, db: dict) -> None:
     (out / "assets" / "site.css").write_text(CSS, encoding="utf-8", newline="\n")
     (out / "assets" / "links-sort.js").write_text(JS, encoding="utf-8", newline="\n")
     (out / "assets" / "token-viewer.js").write_text(TOKEN_VIEWER_JS, encoding="utf-8", newline="\n")
+    (out / "assets" / "design-picker.js").write_text(DESIGN_PICKER_JS, encoding="utf-8", newline="\n")
     shutil.copyfile(ROOT / "tools" / "assets" / "kapiqad.woff", out / "assets" / "kapiqad.woff")
     shutil.copyfile(ROOT / "tools" / "assets" / "favicon.svg", out / "assets" / "favicon.svg")
     # Keep the published artifact independent of optional Jekyll processing on GitHub Pages.
@@ -649,6 +677,9 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; line-heig
 .viewer-controls[hidden] { display: none; }
 .viewer-controls-compact { display: flex; justify-content: center; margin-top: .1rem; }
 .token-visual .viewer-controls-compact { position: absolute; top: calc(100% + .1rem); left: 50%; width: max-content; margin-top: 0; transform: translateX(-50%); }
+.design-picker { display: flex; align-items: center; justify-content: center; gap: .5rem; margin: 0 0 .3rem; color: var(--muted); font-size: .8rem; }
+.design-picker button { min-width: 2rem; min-height: 2rem; border: 1px solid var(--line); border-radius: .3rem; color: var(--text); background: var(--panel); cursor: pointer; }
+.design-picker select { max-width: 8rem; color: var(--text); background: var(--panel); }
 .motion-toggle { display: inline-flex; align-items: center; gap: .4rem; min-height: 2rem; padding: .15rem .3rem; border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: .8rem; }
 .motion-toggle:hover { color: var(--text); }
 .motion-icon { position: relative; display: grid; width: 1.8rem; aspect-ratio: 1; place-items: center; flex: 0 0 auto; background: var(--accent); clip-path: polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%); }
@@ -693,8 +724,11 @@ td { overflow-wrap: anywhere; }
   .intro-grid article, .intro-grid article + article { padding: 1.3rem 0; border-left: 0; }
   .intro-grid article + article { border-top: 1px solid var(--line); }
   .callout { align-items: flex-start; flex-direction: column; padding: 1.4rem; }
-  .token-flow { margin-top: 1.25rem; padding-bottom: 2rem; }
-  .token-flow > .token-aside { float: none; width: 100%; margin: 0 0 1.2rem; }
+  .token-flow { display: flex; flex-direction: column; margin-top: 1.25rem; padding-bottom: 2rem; }
+  .token-flow > .token-aside { order: 3; float: none; width: 100%; margin: 0 0 1.2rem; }
+  .token-flow > .nfc-section { order: 1; }
+  .token-flow > .entries-section { order: 2; }
+  .token-flow > .media-section { order: 4; }
   .token-flow .nfc-text { width: 100%; }
   .token-flow .nfc-section { padding-top: 0; }
   .category-card { grid-template-columns: 3.6rem 1fr; gap: .9rem; padding: 1rem; }
@@ -777,6 +811,49 @@ JS = r'''"use strict";
     button.addEventListener("click", () => sortBy(button.dataset.sort, button.dataset.direction, true));
   });
   sortBy("token", "ascending", false);
+})();
+'''
+
+
+DESIGN_PICKER_JS = r'''"use strict";
+(function () {
+  const stage = document.querySelector("[data-designs]");
+  const select = document.getElementById("design-select");
+  if (!stage || !select) return;
+  const designs = JSON.parse(stage.dataset.designs);
+  const viewer = stage.querySelector("model-viewer");
+  const fallback = document.getElementById("viewer-fallback");
+  const count = document.getElementById("design-count");
+  document.getElementById("design-picker").hidden = false;
+  let index = Math.max(0, designs.findIndex(d => d.id === new URLSearchParams(location.search).get("design")));
+  function choose(next, updateUrl) {
+    index = (next + designs.length) % designs.length;
+    const design = designs[index];
+    select.value = String(index);
+    count.textContent = `${index + 1} von ${designs.length}`;
+    fallback.innerHTML = design.gallery;
+    if (viewer && design.model) {
+      viewer.hidden = true;
+      viewer.style.visibility = "hidden";
+      viewer.setAttribute("aria-hidden", "true");
+      viewer.inert = true;
+      fallback.hidden = false;
+      viewer.src = `${design.root}/${document.querySelector(".token-seal h1").textContent}.glb`;
+      viewer.alt = `Interaktive 3D-Ansicht: ${design.name}`;
+    } else if (viewer) {
+      viewer.removeAttribute("src");
+      viewer.hidden = true;
+      fallback.hidden = false;
+    }
+    if (updateUrl) {
+      const url = new URL(location.href);
+      url.searchParams.set("design", design.id);
+      history.replaceState(null, "", url);
+    }
+  }
+  select.addEventListener("change", () => choose(Number(select.value), true));
+  document.querySelectorAll("[data-design-step]").forEach(button => button.addEventListener("click", () => choose(index + Number(button.dataset.designStep), true)));
+  choose(index, false);
 })();
 '''
 

@@ -1,0 +1,32 @@
+{
+  "year": 2026,
+  "categoryId": "F",
+  "designs": [
+    {
+      "id": "Design01",
+      "name": "Omega and Alpha",
+      "altTexts": {
+        "model": {
+          "de": "Interaktive 3D-Ansicht des Datensteins DnF03."
+        },
+        "front": {
+          "de": "Vorderseite des Datensteins DnF03."
+        },
+        "back": {
+          "de": "Rückseite des Datensteins DnF03."
+        }
+      }
+    }
+  ],
+  "chipType": "NXP NTAG216",
+  "shortLabel": {
+    "de": "reyutqa' lupeQ"
+  },
+  "nfcText": {
+    "originalLanguage": "tlh",
+    "original": "reyutqa' lupeQ jIH.\nyItIv!\nlatlh De': nfc.tlhIngan.at/2026/DnF03",
+    "descriptions": {}
+  },
+  "descriptions": {},
+  "links": []
+}

@@ -11,8 +11,11 @@
 - `tokens` enthält Datensteine. `links` verweist auf Link-IDs, damit Beschreibungen nicht pro Datenstein dupliziert werden müssen.
 - `tokens.*.descriptions` enthält die lokalisierten Texte zum Datenstein.
 - `tokens.*.shortLabel` enthält eine kurze, lokalisierbare Bezeichnung, die auf Detailseiten und in Datenstein-Auflistungen zusätzlich zur ausführlichen Beschreibung erscheint.
-- `tokens.*.media.altTexts` enthält optionale, lokalisierte Alternativtexte für `model`, `front` und `back`. Sie beschreiben den Bildinhalt, nicht den Dateinamen; fehlt ein Text, erzeugt der Website-Build einen allgemeinen Ersatztext.
+- `tokens.*.designs[].altTexts` enthält optionale, lokalisierte Alternativtexte für `model`, `front` und `back` des jeweiligen Designs. Sie beschreiben den Bildinhalt, nicht den Dateinamen; fehlt ein Text, erzeugt der Website-Build einen allgemeinen Ersatztext.
 - `tokens.*.year` enthält das Jahr des Datensteins.
+- `tokens.*.designs` listet die Designs desselben Inhalts. Jedes Design hat eine stabile `id` (Verzeichnisname wie `Design01`) und einen separat gepflegten `name`. Fehlt das Feld bei älteren Einträgen, gilt `Design01` als einziges Design.
+- Design-IDs sind innerhalb einer Dn-ID eindeutig und numerisch fortlaufend. Die Nummer wird mindestens zweistellig formatiert (`Design01` … `Design99`, danach `Design100` usw.); eine zusammengesetzte ID aus Datenstein- und Design-ID wird nicht gespeichert.
+- Medien liegen unter `3d/<Dn-ID>/<Design-ID>/`. Die Dn-ID-Seite bleibt für alle Designs dieselbe; Übersichten und Bestandszahlen zählen Inhalte/Dn-IDs, nicht Designs.
 - `tokens.*.chipType` enthält den Typ des verwendeten NFC-Chips, falls bekannt, zum Beispiel `NXP NTAG216`.
 - `defaultChipType` legt den vorläufigen Chiptyp für Datensteine ohne eigenen Eintrag fest. Aktuell ist das `NXP NTAG216`; ein explizites `tokens.*.chipType` überschreibt den Standard.
 - `nfcText` hält den Text-Eintrag vom Tag getrennt von den redaktionellen Beschreibungen der Website. `original` bewahrt den aus dem NFC-JSON gelesenen Text.
@@ -21,6 +24,10 @@
 - `legacyIds` dokumentiert frühere/falsch geschriebene Token-Adressen. Für DnF01 ist DnF001 eingetragen; diese ID wurde auf einem NFC-Tag verwendet. Der Website-Build muss die Weiterleitung auf DnF01 deshalb dauerhaft erzeugen.
 
 Leere Beschreibungen sind absichtlich als leere Objekte (`{}`) angelegt. Damit ist noch kein Übersetzungstext festgelegt.
+
+## Neuen Datenstein vorbereiten
+
+Die kopierbare Arbeitsvorlage liegt unter `templates/Datenstein/`. Sie enthält einen Datenbankeintrag als Ausgangspunkt und beschreibt, welche NFCTools- und Mediendateien benötigt werden. Die Vorlage wird nicht automatisch eingelesen: Der fertige Token-Eintrag muss in `database.json` unter `tokens` übernommen und neue Linkziele müssen im zentralen `links`-Verzeichnis definiert werden. Die vollständige Schrittfolge steht in `templates/Datenstein/README.md`.
 
 ## Website erzeugen
 

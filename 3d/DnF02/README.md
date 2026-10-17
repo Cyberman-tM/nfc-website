@@ -1,6 +1,6 @@
 # DnF02 – 3D-Dateien
 
-Hier die STL-Eingabedateien für den Datenstein DnF02 ablegen. `3d/build_models.py` findet den Ordner automatisch, sobald mindestens eine STL-Datei darin liegt.
+Hier liegen die STL-Eingabedateien und erzeugten Ansichten für DnF02 im Design-Unterordner `Design01`. `3d/build_models.py` findet Designordner automatisch, sobald mindestens eine STL-Datei darin liegt.
 
 Das Blender-Script erzeugt in diesem Ordner:
 
@@ -8,4 +8,4 @@ Das Blender-Script erzeugt in diesem Ordner:
 - `DnF02_vorne.webp`
 - `DnF02_hinten.webp`
 
-Die Ausgabe ist nach der unveränderlichen Datenstein-ID benannt. Die STL-Dateien und das Blender-Script werden nicht auf der Website angezeigt.
+Die Ausgabe innerhalb jedes Designordners ist nach der unveränderlichen Datenstein-ID benannt. Die Varianten werden in `data/database.json` gepflegt. STL-Dateien und Blender-Script werden nicht auf der Website angezeigt.

@@ -639,14 +639,11 @@ def dreiecke_zaehlen(obj):
 # EINEN DATENSTEIN VERARBEITEN
 # ============================================================
 
-def datenstein_verarbeiten(ordner):
-    datenstein_id = os.path.basename(
-        os.path.normpath(ordner)
-    )
+def datenstein_verarbeiten(ordner, datenstein_id):
 
     print("")
     print("=" * 70)
-    print(f"Verarbeite Datenstein: {datenstein_id}")
+    print(f"Verarbeite Design von {datenstein_id}: {os.path.basename(ordner)}")
     print(f"Ordner: {ordner}")
     print("=" * 70)
 
@@ -808,38 +805,31 @@ def main():
 
     unterordner = []
 
-    for name in sorted(os.listdir(STAMMORDNER)):
-        pfad = os.path.join(
-            STAMMORDNER,
-            name,
-        )
-
-        if not os.path.isdir(pfad):
+    for token_name in sorted(os.listdir(STAMMORDNER)):
+        token_path = os.path.join(STAMMORDNER, token_name)
+        if not os.path.isdir(token_path) or not token_name.startswith("Dn"):
             continue
-
-        stl_dateien = [
-            datei
-            for datei in os.listdir(pfad)
-            if datei.lower().endswith(".stl")
-        ]
-
-        if stl_dateien:
-            unterordner.append(pfad)
+        for design_name in sorted(os.listdir(token_path)):
+            design_path = os.path.join(token_path, design_name)
+            if not os.path.isdir(design_path):
+                continue
+            if any(name.lower().endswith(".stl") for name in os.listdir(design_path)):
+                unterordner.append((design_path, token_name))
 
     if not unterordner:
-        print("Keine Datenstein-Ordner mit STL-Dateien gefunden.")
+        print("Keine Design-Ordner mit STL-Dateien gefunden.")
         return
 
     print("")
-    print("Gefundene Datensteine:")
+    print("Gefundene Designs:")
 
-    for ordner in unterordner:
+    for ordner, datenstein_id in unterordner:
         print(
-            f"  {os.path.basename(ordner)}"
+            f"  {datenstein_id}/{os.path.basename(ordner)}"
         )
 
-    for ordner in unterordner:
-        datenstein_verarbeiten(ordner)
+    for ordner, datenstein_id in unterordner:
+        datenstein_verarbeiten(ordner, datenstein_id)
 
     print("")
     print("=" * 70)
