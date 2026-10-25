@@ -474,11 +474,11 @@ def render(out: Path, db: dict) -> None:
     write_page(out, "404.html", "Seite nicht gefunden", "Die angeforderte Seite ist nicht vorhanden.", '''<header class="page-heading"><p class="eyebrow">404</p><h1>Seite nicht gefunden</h1><p>Diese Adresse ist im Verzeichnis nicht vorhanden.</p><a class="button button-primary" href="index.html">Zur Startseite</a></header>''')
     # GitHub Pages keeps the originally requested URL in the address bar when
     # serving 404.html. Set a base URL so relative assets and navigation links
-    # still resolve from the published project site, even for deeply nested
+    # still resolve from the published site root, even for deeply nested
     # missing URLs.
     not_found = out / "404.html"
     not_found_html = not_found.read_text(encoding="utf-8")
-    not_found_html = not_found_html.replace("<head>\n", '<head>\n  <base href="/nfc-website/">\n', 1)
+    not_found_html = not_found_html.replace("<head>\n", '<head>\n  <base href="/">\n', 1)
     not_found.write_text(not_found_html, encoding="utf-8", newline="\n")
     (out / "assets").mkdir(parents=True, exist_ok=True)
     (out / "assets" / "site.css").write_text(CSS, encoding="utf-8", newline="\n")
