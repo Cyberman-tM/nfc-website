@@ -471,6 +471,7 @@ def render(out: Path, db: dict) -> None:
 <p class="back-link"><a class="text-link" href="../../">← Zur gesamten Linkübersicht</a></p>'''
         write_page(out, f"links/categories/{category_id}/index.html", f"Links: {label}", f"Alle Links der Kategorie {label}.", category_body)
 
+    write_page(out, "404.html", "Seite nicht gefunden", "Die angeforderte Seite ist nicht vorhanden.", '''<header class="page-heading"><p class="eyebrow">404</p><h1>Seite nicht gefunden</h1><p>Diese Adresse ist im Verzeichnis nicht vorhanden.</p><a class="button button-primary" href="index.html">Zur Startseite</a></header>''')
     # GitHub Pages keeps the originally requested URL in the address bar when
     # serving 404.html. Set a base URL so relative assets and navigation links
     # still resolve from the published project site, even for deeply nested
