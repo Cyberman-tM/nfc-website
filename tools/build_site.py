@@ -345,11 +345,11 @@ def render(out: Path, db: dict) -> None:
                 alt_texts = media[index].get("altTexts", legacy_alt_texts)
                 alt = localized(alt_texts.get("model", {})) or f"Interaktive 3D-Ansicht des Datensteins {token_id}, {design['name']}."
                 viewer = f'<model-viewer class="data-stone-viewer" src="{design["root"]}/{token_id}.glb" alt="{esc(alt)}" loading="eager" camera-controls interaction-prompt="none" rotation-per-second="18deg" shadow-intensity="1" exposure="1" touch-action="pan-y" style="visibility:hidden" aria-hidden="true" inert></model-viewer>' if design["model"] else '<p class="media-empty">Keine 3D-Ansicht hinterlegt.</p>'
-                design_cards.append(f'''<article class="design-card"><h3>{esc(design["name"])}</h3><div class="model-stage model-stage-design">{viewer}</div><div class="viewer-controls viewer-controls-design" hidden><button class="motion-toggle" type="button" aria-label="Animation starten" aria-pressed="false"><span class="motion-icon" aria-hidden="true"></span><span class="motion-label">Animation starten</span></button></div><p class="viewer-status visually-hidden" role="status" aria-live="polite">3D-Modell wird geladen …</p></article>''')
+                design_cards.append(f'''<article class="design-card"><h3>{esc(design["name"])}</h3><div class="model-stage model-stage-design">{viewer}</div><p class="viewer-status visually-hidden" role="status" aria-live="polite">3D-Modell wird geladen …</p></article>''')
                 if design["back"]:
                     backs.append(f'<figure><img src="{esc(design["back"])}" alt="Rückseite des Datensteins {esc(token_id)}, {esc(design["name"])}" width="512" height="512"><figcaption>{esc(design["name"])} · Rückseite</figcaption></figure>')
             static_images = (f'<figure><img src="{esc(common_front)}" alt="Vorderseite des Datensteins {esc(token_id)}" width="512" height="512"><figcaption>Vorderseite</figcaption></figure>' if common_front else "") + "".join(backs)
-            media_content = f'<div class="token-designs"><div class="design-viewer-grid" hidden>{"".join(design_cards)}</div><div class="design-stills">{static_images}</div></div>'
+            media_content = f'<div class="token-designs"><div class="design-viewer-grid" hidden>{"".join(design_cards)}</div><div class="viewer-controls viewer-controls-designs" hidden><button class="motion-toggle" id="motion-toggle-designs" type="button" aria-label="Animation starten" aria-pressed="false"><span class="motion-icon" aria-hidden="true"></span><span id="motion-label-designs">Animation starten</span></button></div><div class="design-stills">{static_images}</div></div>'
         else:
             initial_model = f' src="{first["root"]}/{token_id}.glb"' if first["model"] else ""
             model_markup = f'<model-viewer class="data-stone-viewer"{initial_model} alt="{esc(model_alt)}" camera-controls interaction-prompt="none" rotation-per-second="18deg" shadow-intensity="1" exposure="1" touch-action="pan-y" style="visibility:hidden" aria-hidden="true" inert></model-viewer>' if any(d["model"] for d in design_views) else ""
@@ -674,11 +674,11 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; line-heig
 .design-viewer-grid[hidden], .design-stills[hidden] { display: none; }
 .design-card { min-width: 0; }
 .design-card h3 { margin: 0 0 .25rem; color: var(--accent-soft); font-size: .78rem; font-weight: 500; text-align: center; }
-.model-stage-design { height: auto; aspect-ratio: .9; min-height: 0; background: radial-gradient(ellipse at center, #34302a 0%, #24211e 58%, var(--panel) 100%); }
+.model-stage-design { height: auto; aspect-ratio: 1.45; min-height: 0; background: radial-gradient(ellipse at center, #34302a 0%, #24211e 58%, var(--panel) 100%); }
 .model-stage-design .data-stone-viewer, .model-stage-design .viewer-fallback { padding: .5rem; }
 .model-stage-design .viewer-fallback { display: grid; place-items: center; }
 .model-stage-design .viewer-fallback img { width: 100%; height: 100%; object-fit: contain; }
-.viewer-controls-design { display: flex; justify-content: center; margin-top: .2rem; }
+.viewer-controls-designs { display: flex; justify-content: center; margin-top: .1rem; }
 .design-stills { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .35rem; margin-top: .5rem; }
 .design-stills figure { min-width: 0; margin: 0; text-align: center; }
 .design-stills img { display: block; width: 100%; max-height: 5.5rem; object-fit: contain; }
@@ -921,6 +921,72 @@ TOKEN_VIEWER_JS = r'''"use strict";
     multiFailed = true;
     multiGrid.hidden = true;
     multiStills.hidden = false;
+  }
+  if (multiGroup) {
+    const multiControls = multiGroup.querySelector(".viewer-controls-designs");
+    const multiToggle = document.getElementById("motion-toggle-designs");
+    const multiLabel = document.getElementById("motion-label-designs");
+    if (viewers.length !== multiGrid.querySelectorAll(".design-card").length) return;
+    let multiPlaying = false;
+    function setMultiMotion(enabled) {
+      multiPlaying = enabled;
+      viewers.forEach(viewer => enabled ? viewer.play() : viewer.pause());
+      multiToggle.setAttribute("aria-pressed", String(enabled));
+      const action = enabled ? "pausieren" : "starten";
+      multiToggle.setAttribute("aria-label", `Animation ${action}`);
+      multiLabel.textContent = `Animation ${action}`;
+    }
+    function failMultiMotion() {
+      if (multiFailed) return;
+      showMultiFallback();
+      multiControls.hidden = true;
+      viewers.forEach(viewer => {
+        viewer.hidden = true;
+        viewer.removeAttribute("aria-hidden");
+        viewer.inert = true;
+      });
+    }
+    let loadedCount = 0;
+    viewers.forEach(viewer => {
+      const status = viewer.closest(".design-card").querySelector(".viewer-status");
+      let settled = false;
+      const timer = window.setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        status.textContent = fallbackMessage;
+        failMultiMotion();
+      }, 15000);
+      viewer.addEventListener("load", () => {
+        settled = true;
+        window.clearTimeout(timer);
+        if (!viewer.availableAnimations.length) {
+          status.textContent = fallbackMessage;
+          failMultiMotion();
+          return;
+        }
+        viewer.animationName = viewer.availableAnimations[0];
+        viewer.hidden = false;
+        viewer.style.visibility = "visible";
+        viewer.removeAttribute("aria-hidden");
+        viewer.inert = false;
+        status.textContent = "3D-Modell geladen.";
+        loadedCount += 1;
+        if (!multiFailed && loadedCount === viewers.length) {
+          multiGrid.hidden = false;
+          multiStills.hidden = true;
+          multiControls.hidden = false;
+          setMultiMotion(!reducedMotion);
+        }
+      });
+      viewer.addEventListener("error", () => {
+        settled = true;
+        window.clearTimeout(timer);
+        status.textContent = fallbackMessage;
+        failMultiMotion();
+      });
+    });
+    multiToggle.addEventListener("click", () => setMultiMotion(!multiPlaying));
+    return;
   }
   viewers.forEach(viewer => {
     const card = viewer.closest(".design-card");
