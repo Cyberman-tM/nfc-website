@@ -384,7 +384,8 @@ def render(out: Path, db: dict) -> None:
 <section class="content-section nfc-section"><p class="eyebrow">Text auf dem Chip</p>{nfc_block}</section>
 <section class="content-section entries-section"><p class="eyebrow">Einträge</p><ul class="resource-list">{''.join(token_links) or '<li>Keine Einträge vorhanden.</li>'}</ul></section>
 {media_section}</div>'''
-        page_title = f"{token_id}, {token_title(token)}" if token_title(token) else token_id
+        title = token_title(token) or short_label(token)
+        page_title = f"{token_id}, {title}" if title else token_id
         write_page(out, f"{year}/{token_id}/index.html", page_title, f"Dokumentation für Datenstein {token_id}, Jahrgang {year}.", body, token_viewer=any(d["model"] for d in media), brand_suffix=False)
         for legacy_id in token.get("legacyIds", []):
             legacy_target = f"../{token_id}/"
