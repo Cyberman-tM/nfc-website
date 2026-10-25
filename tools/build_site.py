@@ -28,7 +28,7 @@ def esc(value: object) -> str:
     return html.escape(safe_value, quote=True)
 
 
-def write_page(out: Path, relative: str, title: str, description: str, body: str, *, sort_links: bool = False, token_viewer: bool = False, design_picker: bool = False) -> None:
+def write_page(out: Path, relative: str, title: str, description: str, body: str, *, sort_links: bool = False, token_viewer: bool = False, design_picker: bool = False, brand_suffix: bool = True) -> None:
     relative_path = Path(relative)
     depth = len(relative_path.parent.parts) if relative_path.parent != Path(".") else 0
     prefix = "../" * depth or "./"
@@ -48,7 +48,7 @@ def write_page(out: Path, relative: str, title: str, description: str, body: str
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="{esc(description)}">
-  <title>{esc(title)} · De' nagh</title>
+  <title>{esc(title)}{" · De' nagh" if brand_suffix else ""}</title>
   <link rel="icon" type="image/svg+xml" href="{prefix}assets/favicon.svg">
   <link rel="stylesheet" href="{prefix}assets/site.css?v={ASSET_VERSION}">
   {''.join(extra_scripts)}
@@ -384,8 +384,8 @@ def render(out: Path, db: dict) -> None:
 <section class="content-section nfc-section"><p class="eyebrow">Text auf dem Chip</p>{nfc_block}</section>
 <section class="content-section entries-section"><p class="eyebrow">Einträge</p><ul class="resource-list">{''.join(token_links) or '<li>Keine Einträge vorhanden.</li>'}</ul></section>
 {media_section}</div>'''
-        page_title = token_title(token) or token_id
-        write_page(out, f"{year}/{token_id}/index.html", f"{page_title} · {token_id}", f"Dokumentation für Datenstein {token_id}, Jahrgang {year}.", body, token_viewer=any(d["model"] for d in media))
+        page_title = f"{token_id}, {token_title(token)}" if token_title(token) else token_id
+        write_page(out, f"{year}/{token_id}/index.html", page_title, f"Dokumentation für Datenstein {token_id}, Jahrgang {year}.", body, token_viewer=any(d["model"] for d in media), brand_suffix=False)
         for legacy_id in token.get("legacyIds", []):
             legacy_target = f"../{token_id}/"
             legacy_body = f'''<header class="page-heading"><p class="eyebrow">Frühere Adresse</p><h1>{esc(legacy_id)}</h1><p>Diese Adresse wurde früher verwendet. Der Datenstein ist jetzt unter <a href="{esc(legacy_target)}">{esc(token_id)}</a> dokumentiert.</p></header>
