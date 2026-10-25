@@ -674,7 +674,7 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; line-heig
 .design-viewer-grid[hidden], .design-stills[hidden] { display: none; }
 .design-card { min-width: 0; }
 .design-card h3 { margin: 0 0 .25rem; color: var(--accent-soft); font-size: .78rem; font-weight: 500; text-align: center; }
-.model-stage-design { height: auto; aspect-ratio: 1.45; min-height: 0; background: radial-gradient(ellipse at center, #34302a 0%, #24211e 58%, var(--panel) 100%); }
+.model-stage.model-stage-design { height: auto; aspect-ratio: 1.45; min-height: 0; background: radial-gradient(ellipse at center, #34302a 0%, #24211e 58%, var(--panel) 100%); }
 .model-stage-design .data-stone-viewer, .model-stage-design .viewer-fallback { padding: .5rem; }
 .model-stage-design .viewer-fallback { display: grid; place-items: center; }
 .model-stage-design .viewer-fallback img { width: 100%; height: 100%; object-fit: contain; }
