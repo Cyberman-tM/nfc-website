@@ -10,8 +10,8 @@
 - Die globale Linkübersicht zeigt externe Ziel-URLs. URLs auf `nfc.tlhIngan.at` bleiben den Datensteinseiten zugeordnet, werden aber aus dieser Übersicht ausgeblendet.
 - `tokens` enthält Datensteine. `links` verweist auf Link-IDs, damit Beschreibungen nicht pro Datenstein dupliziert werden müssen.
 - `tokens.*.descriptions` enthält die lokalisierten Texte zum Datenstein.
-- `tokens.*.title` enthält einen optionalen lokalisierten Titel. Er wird auf der Detailseite angezeigt und im Seitentitel vor der Dn-ID verwendet.
-- `tokens.*.shortLabel` enthält eine kurze, lokalisierbare Bezeichnung, die auf Detailseiten und in Datenstein-Auflistungen zusätzlich zur ausführlichen Beschreibung erscheint.
+- `tokens.*.title` enthält einen optionalen lokalisierten Titel. Er wird auf der Detailseite angezeigt und im Browser-Seitentitel nach der Dn-ID verwendet.
+- `tokens.*.shortLabel` enthält eine kurze, lokalisierbare Bezeichnung, die auf Detailseiten und in Datenstein-Auflistungen zusätzlich zur ausführlichen Beschreibung erscheint. Wenn kein eigener `title` eingetragen ist, ergänzt `shortLabel` den Browser-Seitentitel.
 - `tokens.*.designs[].altTexts` enthält optionale, lokalisierte Alternativtexte für `model`, `front` und `back` des jeweiligen Designs. Sie beschreiben den Bildinhalt, nicht den Dateinamen; fehlt ein Text, erzeugt der Website-Build einen allgemeinen Ersatztext.
 - `tokens.*.year` enthält das Jahr des Datensteins.
 - `tokens.*.designs` listet die Designs desselben Inhalts. Jedes Design hat eine stabile `id` (Verzeichnisname wie `Design01`) und einen separat gepflegten `name`. Fehlt das Feld bei älteren Einträgen, gilt `Design01` als einziges Design.
@@ -33,3 +33,5 @@ Kopiere `prepare/templates/Datenstein/` nach `prepare/incoming/<Dn-ID>/`. Der Vo
 ## Website erzeugen
 
 `tools/build_site.py` erzeugt ausschließlich aus `content/database.json` und den freigegebenen Medien eine statische Vorschau im Ordner `site/`. Der Import und der Website-Build sind getrennte Schritte. Mit `python tools/build_site.py` werden die Seiten neu erzeugt.
+
+Der Build prüft außerdem die erzeugten Hauptseiten, alle Datensteinseiten und deren lokale HTML-Verweise. Ein fehlendes lokales Ziel lässt den Build fehlschlagen.

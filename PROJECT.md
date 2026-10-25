@@ -55,7 +55,7 @@ URLs aus veröffentlichten Seiten und auf NFC-Tags sind dauerhaft zu erhalten. B
 - `shortLabel` enthält eine kurze interne Bezeichnung, die auf Datenstein-Detailseiten und in Auflistungen neben der ausführlichen Beschreibung hilft, einen Datenstein schnell zu erkennen. Das Feld ist nach Sprache lokalisiert.
 - Im NFC-Tag steht zuerst ein kurzer Texteinsatz, der die URL als Text enthält, danach der explizite URL-Eintrag. Ein Android-Test zeigte, dass die Übersicht nur dann angezeigt wurde, wenn der Texteinsatz zuerst kommt. Diese Reihenfolge ist eine praktische Vorgabe aus dem Test.
 - NFCTools-JSON-Exporte bleiben als lokale Rohquelle optional unter `prepare/incoming/<Dn-ID>/<Dn-ID>.json`. Der Importer archiviert eine bereinigte Fassung in `content/token_archive/`; das Exportformat ist nicht das verbindliche Website-Datenbankschema und kann sich ändern.
-- Mehrere physische Exemplare mit demselben Inhalt teilen dieselbe Dn-ID, unabhängig vom Design. Auf der gemeinsamen Datensteinseite kann zwischen den Designs gewechselt werden.
+- Die Dn-ID bezeichnet den Inhalt, nicht das Design. Alle Designs desselben Inhalts teilen dieselbe Dn-ID und Detailseite; Design-IDs unterscheiden die Varianten.
 - Auf Token-Seiten sind sichtbare Verweise auf Datensteine mit gleichem Inhalt oder gleichem Design erwünscht. Eine kompakte Infobox oder ein Abschnitt „Verwandte Datensteine“ ist eine mögliche Darstellung; Datenbankschema und genaue Darstellung sind offen.
 - Der Chiptyp wird im Feld `chipType` geführt; für nicht einzeln festgelegte Datensteine gilt der Datenbankstandard `defaultChipType`. Aktuell verwenden alle Datensteine `NXP NTAG216`; frühestens 2027 könnte sich das ändern. Ein anderer Chiptyp soll voraussichtlich als neuer Datenstein mit neuer ID behandelt werden.
 
@@ -75,7 +75,7 @@ URLs aus veröffentlichten Seiten und auf NFC-Tags sind dauerhaft zu erhalten. B
 
 ## Mehrsprachigkeit
 
-- Deutsch und Englisch werden auf jeden Fall benötigt. Klingonisch (`tlh`) ist möglich; weitere Sprachen können später ergänzt werden.
+- Deutsch ist die veröffentlichte Sprache. Englisch bleibt bis nach dem qepHom 2026 deaktiviert; Übersetzungen sollen erst danach vorbereitet und geprüft werden. Klingonisch (`tlh`) ist möglich, aber nicht terminiert.
 - Empfohlene technische Richtung: nicht die erzeugten HTML-Seiten übersetzen oder direkt bearbeiten. Übersetzbare Inhaltsfelder bleiben in den Quelldaten mehrsprachig; Oberflächentexte (Navigation, Buttons, Überschriften, Meldungen) kommen in einen zentralen Katalog je Sprache. Der Generator verwendet dieselben Templates und erzeugt daraus vollständige statische Seiten pro Sprache.
 - Für Englisch darf eine maschinelle Rohübersetzung als Arbeitsentwurf dienen, die anschließend manuell geprüft und überarbeitet wird. Die Rohübersetzung soll nicht zur Laufzeit des Builds erstellt werden. Klingonische Texte werden ausschließlich von Menschen übersetzt und geprüft.
 - Jede Sprachfassung soll als eigenständige statische Seite verfügbar sein und mit den anderen Fassungen verlinken. Eine fehlende Übersetzung darf als nicht verfügbar ausgewiesen werden, statt unvollständigen Text vorzutäuschen.
@@ -100,7 +100,9 @@ Die Infobox selbst behält ihre vorhandene Fläche und Umrandung; nur ihre Über
 
 ### Festgelegte Anordnung der Datenstein-Seite
 
-- Im Kopfbereich des Datensteins stehen Siegel mit ID und Kategorie links, die Beschreibung mittig und die optionale 3D-Darstellung mit Pause-Schaltfläche rechts. ID und 3D-Darstellung werden von oben aus auf gleiche optische Größe abgestimmt; der Pause-Text zählt dabei nicht zur Höhe des Modells.
+- Im Kopfbereich des Datensteins stehen Siegel mit ID und Kategorie links, die Beschreibung mittig und die optionale 3D-Darstellung mit Pause-Schaltfläche rechts. Bei mehreren Designs erscheinen die Animationen nebeneinander und teilen sich eine Pause-Schaltfläche. Die Darstellungen bleiben kompakt und passen sich an schmale Bildschirme an.
+- Wenn die Animationen nicht geladen werden können, erscheinen statische Bilder als Alternative: die gemeinsame Vorderseite einmal und darunter alle designbezogenen Rückseiten.
+- Der Browser-Seitentitel eines Datensteins lautet `Dn-ID, Datenstein-Titel`; fehlt ein eigener Titel, wird `shortLabel` verwendet. Der Markenname wird an Datenstein-Seitentitel nicht angehängt.
 - Die Beschreibung steht ohne eigene sichtbare Überschrift zwischen Siegel und 3D-Darstellung. Sie nutzt den verfügbaren Platz und ist zentriert. Bei wenig Breite rücken die Symbole zusammen; die Beschreibung wechselt darunter. Bei mehrzeiliger Beschreibung wachsen der Bereich und die Symbole bleiben vertikal mittig.
 - Die Infobox heißt „Details“ und beginnt auf gleicher Höhe wie der Bereich „Text auf dem Chip“. Sie behält ihre dunkle Fläche und Umrandung; ihre Überschrift verwendet die Markenfarbe.
 - „Text auf dem Chip“ ist ein fester, oberer Inhaltsbereich und nimmt die verfügbare Textbreite ein. Die durchgehende Linie darunter trennt diesen oberen Bereich von den variablen Einträgen; zwischen Beschreibung und Chiptext gibt es keine Trennlinie.
@@ -150,7 +152,7 @@ Die Infobox selbst behält ihre vorhandene Fläche und Umrandung; nur ihre Über
 - Semantische HTML-Elemente, sinnvolle Überschriftenhierarchie, aussagekräftige Linktexte und Tastaturbedienbarkeit unterstützen Screenreader und andere Hilfsmittel.
 - Inhaltliche Bilder bekommen beschreibende Alternativtexte, dekorative Bilder `alt=""`; Dateinamen sind keine Alternativtexte.
 - Bei Bildern sollen `width` und `height` angegeben werden, damit der Browser den Platz vor dem Laden reservieren kann.
-- Token-3D-Ansichten verwenden optional das externe `<model-viewer>`-Webcomponent. Statische Bilder bleiben sichtbar, bis das Modell erfolgreich geladen ist, und dienen als Fehler-Fallback. Die Wiedergabe berücksichtigt reduzierte Bewegung und bietet eine bedienbare Umschaltung der automatischen Drehung.
+- Token-3D-Ansichten verwenden optional das externe `<model-viewer>`-Webcomponent. Statische Bilder bleiben sichtbar, bis alle Modelle erfolgreich geladen sind, und dienen als Fehler-Fallback. Bei mehreren Animationen steuert eine gemeinsame Schaltfläche beide Modelle. Die Wiedergabe berücksichtigt reduzierte Bewegung.
 - Die STL-Quelldateien und Blender-Scripts dienen ausschließlich der Medienerzeugung. Der Website-Build veröffentlicht daraus nur das ID-benannte GLB-Modell und die ID-benannten Vorschaubilder.
 - KApIqaD ist eine dekorative pIqaD-Schrift; Inhaltstexte bleiben in normaler Schrift und lesbarer Umschrift. Provenienz und Hinweis zur Umschrift stehen in `tools/assets/README.md`.
 - pIqaD-Elemente sind standardmäßig rein dekorativ, für Hilfstechnologien verborgen und dürfen bei Platzmangel entfallen. Sie tragen keine notwendige Information; eine Ausnahme muss ausdrücklich festgelegt werden.
@@ -167,7 +169,7 @@ Ein Datenstein kann mehrere Designs haben. Gestaltung und Medien liegen pro Desi
 2. Quelldaten und erzeugte Ausgabedateien klar unterscheiden. Freigegebene Quelldaten liegen unter `content/`; private Roh-Eingaben liegen lokal in `prepare/incoming/`. Veröffentlichte Dateien sind statische Artefakte.
 3. Eine Änderung an der Datenquelle soll den nötigen Build/Regenerierungsschritt nachvollziehbar machen. Build-Schritte dürfen keine manuelle Webserver-Datenbank benötigen.
 4. Vorhandene URLs und Inhalte nicht entfernen oder stillschweigend umwidmen. Alte Tippfehler-URLs nur mit expliziter Legacy-Zuordnung behandeln.
-5. `tools/import_tokens.py` zeigt Datenbank- und Medienänderungen zunächst an und übernimmt sie erst mit `--apply` plus Bestätigung. `tools/build_site.py` bleibt ein separater Schritt und liest nur die normalisierte Datenbank. Lokal dient `site/` der Vorschau und bleibt von Git ausgeschlossen. GitHub Actions baut die Website bei Änderungen auf `main` und veröffentlicht sie mit GitHub Pages.
+5. `tools/import_tokens.py` zeigt Datenbank- und Medienänderungen zunächst an und übernimmt sie erst mit `--apply` plus Bestätigung. `tools/build_site.py` bleibt ein separater Schritt und liest nur die normalisierte Datenbank. Der Build prüft die erforderlichen Ausgabedateien, Datensteinseiten und lokalen HTML-Verweise. Lokal dient `site/` der Vorschau und bleibt von Git ausgeschlossen. GitHub Actions baut die Website bei Änderungen auf `main`, führt dieselbe Prüfung aus und veröffentlicht sie anschließend mit GitHub Pages unter `https://nfc.tlhIngan.at/`.
 6. Erklärende Kommentare sind in Quelldaten, Build-Code und Projektdateien willkommen, wenn sie einen Grund oder eine Maintainer-Entscheidung festhalten. Kommentare in ausgeliefertem HTML sind nur für seitenbezogene Hinweise gedacht.
 
 ## Aktuelle Abgleichspunkte
@@ -176,17 +178,14 @@ Diese Punkte bei Datenänderungen weiterhin gegen die Inhaltsdatenbank und die e
 
 - Kategorie `F` ist als `Freiform` festgelegt. Die Definition soll sowohl nicht anderweitig einordenbare Datensteine als auch für andere erstellte Datensteine umfassen.
 - `content/database.json` führt aktuell nur `de` und `en` als unterstützte Sprachen; `tlh` ist geplant, aber noch nicht als veröffentlichte Übersetzung festgelegt.
-- Die Kategorie-Regel für F, Tokenbeschreibungen und Linkbeschreibungen sind noch zu prüfen und gegebenenfalls zu ergänzen.
-- DnF02 ist für den Jahrgang 2026 in Kategorie F eingetragen. Das GLB-Modell und beide Ansichten liegen in `content/media/DnF02/Design01/`. Der bereinigte NFCTools-Export liegt unter `content/token_archive/DnF02.json`; NFC-Text und Linkziele daraus sind in `content/database.json` übernommen. Die ausführliche Beschreibung ist noch offen.
+- Die automatische Kategorie-Regel für F ist eingerichtet. Ausführliche deutsche Beschreibungen für DnF01 bis DnF03 fehlen noch und können nach und nach ergänzt werden.
+- DnF02 ist für den Jahrgang 2026 in Kategorie F eingetragen. Das GLB-Modell und beide Ansichten liegen in `content/media/DnF02/Design01/`. Der bereinigte NFCTools-Export liegt unter `content/token_archive/DnF02.json`; NFC-Text und Linkziele daraus sind in `content/database.json` übernommen.
 - Die ID `DnF001` ist falsch formatiert; gültig ist `DnF01`. `DnF001` wurde tatsächlich auf einem NFC-Tag verwendet und muss daher als dauerhafte Weiterleitung auf `DnF01` erhalten bleiben.
 - Die Jahrgangsgrenze ist festgelegt: Alles vor dem jeweiligen November-qepHom gehört zu diesem qepHom-Jahrgang, alles danach zum nächsten.
 
 ## Noch offene Entscheidungen
 
-- Namen und Beschreibungen für die noch nicht vergebenen Kategorien `1` bis `E`; Planung weiterer Kategorien voraussichtlich nach dem qepHom
-- Sprachpfade, Übersetzungskatalog für Oberflächentexte und Verknüpfung der Sprachfassungen
-- Regel für eigene IDs bei gleicher Inhaltsbasis und unterschiedlichem Design; der Nutzer bevorzugt einen eigenen Datenstein-Link je Design
-- Schema für Inhalts-/Design-Beziehungen und sichtbare Verweise
-- abschließende Bestätigung der Regel: ein Wechsel des Chiptyps ergibt eine neue Dn-ID
-- Galerieaufbau für Vorder- und Rückseiten
-- Veröffentlichungsablauf; zuerst wird die lokale Website fertiggestellt, Hosting/DNS folgt später
+- Namen und Beschreibungen für die noch nicht vergebenen Kategorien `1` bis `E`; erneute Planung nach dem qepHom 2026.
+- Zeitpunkt und Umfang der englischen Übersetzungen; die Umsetzung ist bewusst auf die Zeit nach dem qepHom 2026 verschoben.
+- Ob ein Wechsel des NFC-Chiptyps eine neue Dn-ID erfordert.
+- Wie inhaltlich verwandte Datensteine mit unterschiedlichen Dn-IDs sichtbar miteinander verknüpft werden.

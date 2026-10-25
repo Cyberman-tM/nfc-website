@@ -9,8 +9,9 @@ import html
 import json
 import re
 import shutil
+from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import unquote, urljoin, urlparse, urlsplit
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -28,7 +29,67 @@ def esc(value: object) -> str:
     return html.escape(safe_value, quote=True)
 
 
-def write_page(out: Path, relative: str, title: str, description: str, body: str, *, sort_links: bool = False, token_viewer: bool = False, design_picker: bool = False, brand_suffix: bool = True) -> None:
+class LocalReferenceParser(HTMLParser):
+    """Collect local HTML references while respecting an optional base URL."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.references: list[str] = []
+        self.base_href = ""
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        attributes = dict(attrs)
+        if tag == "base" and attributes.get("href"):
+            self.base_href = attributes["href"] or ""
+        for name in ("href", "src", "poster"):
+            value = attributes.get(name)
+            if value:
+                self.references.append(value)
+
+
+def check_generated_site(out: Path, tokens: dict) -> None:
+    """Fail the build for missing key outputs, token pages, or local HTML targets."""
+    required_files = (
+        "index.html", "404.html", ".nojekyll", "assets/site.css",
+        "assets/links-sort.js", "assets/token-viewer.js", "assets/favicon.svg",
+        "assets/kapiqad.woff",
+    )
+    errors = [f"Fehlende Ausgabedatei: {relative}" for relative in required_files if not (out / relative).is_file()]
+    for token_id, token in tokens.items():
+        page = out / str(token["year"]) / token_id / "index.html"
+        if not page.is_file():
+            errors.append(f"Fehlende Datensteinseite: {page.relative_to(out)}")
+
+    output_root = out.resolve()
+    page_files = sorted(out.rglob("*.html"))
+    reference_count = 0
+    for page in page_files:
+        parser = LocalReferenceParser()
+        parser.feed(page.read_text(encoding="utf-8"))
+        page_url = f"https://site.invalid/{page.relative_to(out).as_posix()}"
+        base_url = urljoin(page_url, parser.base_href) if parser.base_href else page_url
+        for reference in parser.references:
+            parsed = urlsplit(reference)
+            if parsed.scheme or parsed.netloc:
+                continue
+            reference_count += 1
+            resolved = urlsplit(urljoin(base_url, reference))
+            target_path = unquote(resolved.path)
+            target = (output_root / target_path.lstrip("/")).resolve()
+            if not target.is_relative_to(output_root):
+                errors.append(f"Verweis verlässt den Ausgabeordner: {page.relative_to(out)} → {reference}")
+                continue
+            if target.is_dir():
+                target /= "index.html"
+            if not target.is_file():
+                errors.append(f"Lokales Ziel fehlt: {page.relative_to(out)} → {reference}")
+
+    if errors:
+        raise ValueError("Build-Prüfung fehlgeschlagen:\n- " + "\n- ".join(errors))
+    print(f"Build-Prüfung erfolgreich: {len(page_files)} HTML-Seiten, {reference_count} lokale Verweise.")
+
+
+def write_page(out: Path, relative: str, title: str, description: str, body: str, *, sort_links: bool = False, token_viewer: bool = False, brand_suffix: bool = True) -> None:
     relative_path = Path(relative)
     depth = len(relative_path.parent.parts) if relative_path.parent != Path(".") else 0
     prefix = "../" * depth or "./"
@@ -40,8 +101,6 @@ def write_page(out: Path, relative: str, title: str, description: str, body: str
             '<script type="module" async src="https://ajax.googleapis.com/ajax/libs/model-viewer/4.3.1/model-viewer.min.js"></script>',
             f'<script src="{prefix}assets/token-viewer.js" defer></script>',
         ])
-    if design_picker:
-        extra_scripts.append(f'<script src="{prefix}assets/design-picker.js" defer></script>')
     page = f'''<!doctype html>
 <html lang="de">
 <head>
@@ -485,11 +544,14 @@ def render(out: Path, db: dict) -> None:
     (out / "assets" / "site.css").write_text(CSS, encoding="utf-8", newline="\n")
     (out / "assets" / "links-sort.js").write_text(JS, encoding="utf-8", newline="\n")
     (out / "assets" / "token-viewer.js").write_text(TOKEN_VIEWER_JS, encoding="utf-8", newline="\n")
-    (out / "assets" / "design-picker.js").write_text(DESIGN_PICKER_JS, encoding="utf-8", newline="\n")
     shutil.copyfile(ROOT / "tools" / "assets" / "kapiqad.woff", out / "assets" / "kapiqad.woff")
     shutil.copyfile(ROOT / "tools" / "assets" / "favicon.svg", out / "assets" / "favicon.svg")
     # Keep the published artifact independent of optional Jekyll processing on GitHub Pages.
     (out / ".nojekyll").write_text("", encoding="utf-8")
+    obsolete_picker = out / "assets" / "design-picker.js"
+    if obsolete_picker.exists():
+        obsolete_picker.unlink()
+    check_generated_site(out, tokens)
 
 
 CSS = r'''@charset "utf-8";
@@ -719,9 +781,6 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; line-heig
 .viewer-controls[hidden] { display: none; }
 .viewer-controls-compact { display: flex; justify-content: center; margin-top: .1rem; }
 .token-visual .viewer-controls-compact { position: absolute; top: calc(100% + .1rem); left: 50%; width: max-content; margin-top: 0; transform: translateX(-50%); }
-.design-picker { display: flex; align-items: center; justify-content: center; gap: .5rem; margin: 0 0 .3rem; color: var(--muted); font-size: .8rem; }
-.design-picker button { min-width: 2rem; min-height: 2rem; border: 1px solid var(--line); border-radius: .3rem; color: var(--text); background: var(--panel); cursor: pointer; }
-.design-picker select { max-width: 8rem; color: var(--text); background: var(--panel); }
 .motion-toggle { display: inline-flex; align-items: center; gap: .4rem; min-height: 2rem; padding: .15rem .3rem; border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: .8rem; }
 .motion-toggle:hover { color: var(--text); }
 .motion-icon { position: relative; display: grid; width: 1.8rem; aspect-ratio: 1; place-items: center; flex: 0 0 auto; background: var(--accent); clip-path: polygon(30% 0,70% 0,100% 30%,100% 70%,70% 100%,30% 100%,0 70%,0 30%); }
@@ -861,49 +920,6 @@ JS = r'''"use strict";
     button.addEventListener("click", () => sortBy(button.dataset.sort, button.dataset.direction, true));
   });
   sortBy("token", "ascending", false);
-})();
-'''
-
-
-DESIGN_PICKER_JS = r'''"use strict";
-(function () {
-  const stage = document.querySelector("[data-designs]");
-  const select = document.getElementById("design-select");
-  if (!stage || !select) return;
-  const designs = JSON.parse(stage.dataset.designs);
-  const viewer = stage.querySelector("model-viewer");
-  const fallback = document.getElementById("viewer-fallback");
-  const count = document.getElementById("design-count");
-  document.getElementById("design-picker").hidden = false;
-  let index = Math.max(0, designs.findIndex(d => d.id === new URLSearchParams(location.search).get("design")));
-  function choose(next, updateUrl) {
-    index = (next + designs.length) % designs.length;
-    const design = designs[index];
-    select.value = String(index);
-    count.textContent = `${index + 1} von ${designs.length}`;
-    fallback.innerHTML = design.gallery;
-    if (viewer && design.model) {
-      viewer.hidden = true;
-      viewer.style.visibility = "hidden";
-      viewer.setAttribute("aria-hidden", "true");
-      viewer.inert = true;
-      fallback.hidden = false;
-      viewer.src = `${design.root}/${document.querySelector(".token-seal h1").textContent}.glb`;
-      viewer.alt = `Interaktive 3D-Ansicht: ${design.name}`;
-    } else if (viewer) {
-      viewer.removeAttribute("src");
-      viewer.hidden = true;
-      fallback.hidden = false;
-    }
-    if (updateUrl) {
-      const url = new URL(location.href);
-      url.searchParams.set("design", design.id);
-      history.replaceState(null, "", url);
-    }
-  }
-  select.addEventListener("change", () => choose(Number(select.value), true));
-  document.querySelectorAll("[data-design-step]").forEach(button => button.addEventListener("click", () => choose(index + Number(button.dataset.designStep), true)));
-  choose(index, false);
 })();
 '''
 
