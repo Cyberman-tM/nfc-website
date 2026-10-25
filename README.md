@@ -2,20 +2,30 @@
 
 Statische, mehrsprachige Dokumentationswebsite für NFC-Datensteine (De' nagh).
 
-- [Projekt- und Architekturleitfaden](PROJECT.md)
-- [Quelldaten und Datenbankschema](data/README.md)
-- [Vorlage für neue Datensteine](templates/Datenstein/README.md)
+## Ordnerübersicht
 
-## Vorschau erzeugen
+- `prepare/` enthält Arbeitsmaterial: Vorlagen, lokale Rohdaten und eine Designvorschau.
+- `content/` enthält die freigegebenen Quelldaten, das Token-Archiv und Medien.
+- `site/` enthält die automatisch erzeugte Website.
+- `tools/` enthält Import-, Blender- und Website-Scripts.
 
-Mit Python 3 die statischen Seiten aus den Quelldaten generieren:
+Weiterführend: [Datenbankschema](content/README.md), [Vorlage](prepare/templates/Datenstein/README.md), [Arbeitsablauf](prepare/incoming/README.md), [Architekturentscheidungen](PROJECT.md).
+
+## Datenstein vorbereiten und übernehmen
+
+Kopiere `prepare/templates/Datenstein/` nach `prepare/incoming/<Dn-ID>/`. Ergänze `token_info.json`, lege STL-Dateien in `Design01/` ab und folge [der Ablaufanleitung](prepare/incoming/README.md).
+
+Änderungen erst ansehen, dann übernehmen:
+
+```powershell
+python tools/import_tokens.py DnF04
+python tools/import_tokens.py DnF04 --apply
+```
+
+Die Website wird getrennt aus den freigegebenen Daten generiert:
 
 ```powershell
 python tools/build_site.py
 ```
 
-Die fertigen Dateien liegen anschließend unter `site/`. Für die lokale Vorschau kann dort ein einfacher statischer HTTP-Server gestartet werden.
-
-## GitHub Pages
-
-Die Website wird beim Push auf `main` über GitHub Actions aus den Quelldaten neu gebaut und als statische Seite veröffentlicht. Die vorgesehene Projektseiten-Adresse ist `https://Cyberman-tM.github.io/nfc-website/`. In den Repository-Einstellungen muss unter **Settings → Pages → Build and deployment** als Quelle **GitHub Actions** ausgewählt sein. Es wird keine benutzerdefinierte Domain konfiguriert.
+Die fertigen Dateien liegen danach unter `site/`. GitHub Actions baut und veröffentlicht sie bei Pushes auf `main` mit GitHub Pages.

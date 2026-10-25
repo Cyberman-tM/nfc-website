@@ -1,0 +1,346 @@
+{
+  "data": [
+    {
+      "kRecordDescription": "reyutqa' lupeQ jIH.\nyItIv!\nlatlh De': nfc.tlhIngan.at/2026/DnF03\n\nchorI': [E-Mail-Adresse entfernt]",
+      "kRecordField1": "reyutqa' lupeQ jIH.\nyItIv!\nlatlh De': nfc.tlhIngan.at/2026/DnF03\n\nchorI': [E-Mail-Adresse entfernt]",
+      "kRecordObject": {
+        "kChunked": false,
+        "kId": [],
+        "kPayload": [],
+        "kTnf": 1,
+        "kType": [
+          84
+        ]
+      },
+      "kRecordSelection": 0,
+      "kRecordSize": 0
+    },
+    {
+      "kRecordDescription": "[E-Mail-Adresse entfernt]\nreyutqa' lupeQ",
+      "kRecordField1": "[E-Mail-Adresse entfernt]",
+      "kRecordField2": "reyutqa' lupeQ",
+      "kRecordField3": "",
+      "kRecordObject": {
+        "kChunked": false,
+        "kId": [],
+        "kPayload": [],
+        "kTnf": 1,
+        "kType": [
+          85
+        ]
+      },
+      "kRecordSelection": 3,
+      "kRecordSize": 0
+    },
+    {
+      "kRecordDescription": "https://nfc.tlhIngan.at/2026/DnF03",
+      "kRecordField1": "https://",
+      "kRecordField2": "nfc.tlhIngan.at/2026/DnF03",
+      "kRecordObject": {
+        "kChunked": false,
+        "kId": [],
+        "kPayload": [
+          4,
+          110,
+          102,
+          99,
+          46,
+          116,
+          108,
+          104,
+          73,
+          110,
+          103,
+          97,
+          110,
+          46,
+          97,
+          116,
+          47,
+          50,
+          48,
+          50,
+          54,
+          47,
+          68,
+          110,
+          70,
+          48,
+          51
+        ],
+        "kTnf": 1,
+        "kType": [
+          85
+        ]
+      },
+      "kRecordSelection": 1,
+      "kRecordSize": 27
+    },
+    {
+      "kRecordDescription": "https://tlhingan.at/",
+      "kRecordField1": "https://",
+      "kRecordField2": "tlhingan.at/",
+      "kRecordObject": {
+        "kChunked": false,
+        "kId": [],
+        "kPayload": [
+          4,
+          116,
+          108,
+          104,
+          105,
+          110,
+          103,
+          97,
+          110,
+          46,
+          97,
+          116,
+          47
+        ],
+        "kTnf": 1,
+        "kType": [
+          85
+        ]
+      },
+      "kRecordSelection": 1,
+      "kRecordSize": 13
+    },
+    {
+      "kRecordDescription": "https://scrabble.tlhIngan.at/",
+      "kRecordField1": "https://",
+      "kRecordField2": "scrabble.tlhIngan.at/",
+      "kRecordObject": {
+        "kChunked": false,
+        "kId": [],
+        "kPayload": [
+          4,
+          115,
+          99,
+          114,
+          97,
+          98,
+          98,
+          108,
+          101,
+          46,
+          116,
+          108,
+          104,
+          73,
+          110,
+          103,
+          97,
+          110,
+          46,
+          97,
+          116,
+          47
+        ],
+        "kTnf": 1,
+        "kType": [
+          85
+        ]
+      },
+      "kRecordSelection": 1,
+      "kRecordSize": 22
+    },
+    {
+      "kRecordDescription": "https://quja.tlhIngan.at/",
+      "kRecordField1": "https://",
+      "kRecordField2": "quja.tlhIngan.at/",
+      "kRecordObject": {
+        "kChunked": false,
+        "kId": [],
+        "kPayload": [
+          4,
+          113,
+          117,
+          106,
+          97,
+          46,
+          116,
+          108,
+          104,
+          73,
+          110,
+          103,
+          97,
+          110,
+          46,
+          97,
+          116,
+          47
+        ],
+        "kTnf": 1,
+        "kType": [
+          85
+        ]
+      },
+      "kRecordSelection": 1,
+      "kRecordSize": 18
+    },
+    {
+      "kRecordDescription": "https://be.tlhIngan.at/",
+      "kRecordField1": "https://",
+      "kRecordField2": "be.tlhIngan.at/",
+      "kRecordObject": {
+        "kChunked": false,
+        "kId": [],
+        "kPayload": [
+          4,
+          98,
+          101,
+          46,
+          116,
+          108,
+          104,
+          73,
+          110,
+          103,
+          97,
+          110,
+          46,
+          97,
+          116,
+          47
+        ],
+        "kTnf": 1,
+        "kType": [
+          85
+        ]
+      },
+      "kRecordSelection": 1,
+      "kRecordSize": 16
+    },
+    {
+      "kRecordDescription": "https://sfa.tlhIngan.at/",
+      "kRecordField1": "https://",
+      "kRecordField2": "sfa.tlhIngan.at/",
+      "kRecordObject": {
+        "kChunked": false,
+        "kId": [],
+        "kPayload": [
+          4,
+          115,
+          102,
+          97,
+          46,
+          116,
+          108,
+          104,
+          73,
+          110,
+          103,
+          97,
+          110,
+          46,
+          97,
+          116,
+          47
+        ],
+        "kTnf": 1,
+        "kType": [
+          85
+        ]
+      },
+      "kRecordSelection": 1,
+      "kRecordSize": 17
+    },
+    {
+      "kRecordDescription": "https://svb.tlhIngan.at/",
+      "kRecordField1": "https://",
+      "kRecordField2": "svb.tlhIngan.at/",
+      "kRecordObject": {
+        "kChunked": false,
+        "kId": [],
+        "kPayload": [
+          4,
+          115,
+          118,
+          98,
+          46,
+          116,
+          108,
+          104,
+          73,
+          110,
+          103,
+          97,
+          110,
+          46,
+          97,
+          116,
+          47
+        ],
+        "kTnf": 1,
+        "kType": [
+          85
+        ]
+      },
+      "kRecordSelection": 1,
+      "kRecordSize": 17
+    },
+    {
+      "kRecordDescription": "https://www.youtube.com/@christophalexander4542/videos",
+      "kRecordField1": "https://www.",
+      "kRecordField2": "youtube.com/@christophalexander4542/videos",
+      "kRecordObject": {
+        "kChunked": false,
+        "kId": [],
+        "kPayload": [
+          2,
+          121,
+          111,
+          117,
+          116,
+          117,
+          98,
+          101,
+          46,
+          99,
+          111,
+          109,
+          47,
+          64,
+          99,
+          104,
+          114,
+          105,
+          115,
+          116,
+          111,
+          112,
+          104,
+          97,
+          108,
+          101,
+          120,
+          97,
+          110,
+          100,
+          101,
+          114,
+          52,
+          53,
+          52,
+          50,
+          47,
+          118,
+          105,
+          100,
+          101,
+          111,
+          115
+        ],
+        "kTnf": 1,
+        "kType": [
+          85
+        ]
+      },
+      "kRecordSelection": 1,
+      "kRecordSize": 43
+    }
+  ],
+  "ntgui_version": 18
+}

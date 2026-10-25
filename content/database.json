@@ -1,0 +1,528 @@
+{
+  "categoryRules": [
+    {
+      "appliesTo": "link",
+      "condition": {
+        "field": "url.hostname",
+        "matchesAny": [
+          "youtube.com",
+          "www.youtube.com",
+          "youtu.be",
+          "www.youtu.be"
+        ]
+      },
+      "linkCategoryId": "youtube"
+    },
+    {
+      "appliesTo": "link",
+      "condition": {
+        "field": "url.hostname",
+        "matchesAny": [
+          "facebook.com",
+          "www.facebook.com"
+        ]
+      },
+      "linkCategoryId": "facebook"
+    },
+    {
+      "appliesTo": "link",
+      "condition": {
+        "field": "url.hostname",
+        "matchesAny": [
+          "discord.gg",
+          "discord.com",
+          "www.discord.com"
+        ]
+      },
+      "linkCategoryId": "discord"
+    },
+    {
+      "appliesTo": "link",
+      "condition": {
+        "field": "url.hostname",
+        "matchesAny": [
+          "klingon.wiki",
+          "www.klingon.wiki"
+        ]
+      },
+      "linkCategoryId": "wiki"
+    },
+    {
+      "appliesTo": "token",
+      "condition": {
+        "field": "id",
+        "startsWith": "F"
+      },
+      "tokenCategoryId": "F"
+    }
+  ],
+  "defaultChipType": "NXP NTAG216",
+  "defaultLanguage": "de",
+  "languages": {
+    "de": "Deutsch",
+    "en": "English"
+  },
+  "linkCategories": {
+    "channel": {
+      "labels": {
+        "de": "Kanal",
+        "en": "Channel"
+      }
+    },
+    "discord": {
+      "labels": {
+        "de": "Discord",
+        "en": "Discord"
+      }
+    },
+    "facebook": {
+      "labels": {
+        "de": "Facebook",
+        "en": "Facebook"
+      }
+    },
+    "playlist": {
+      "labels": {
+        "de": "Playlist",
+        "en": "Playlist"
+      }
+    },
+    "verlag": {
+      "labels": {
+        "de": "Verlag",
+        "en": "Publisher"
+      }
+    },
+    "video": {
+      "labels": {}
+    },
+    "wiki": {
+      "labels": {
+        "de": "Wiki",
+        "en": "Wiki"
+      }
+    },
+    "youtube": {
+      "labels": {
+        "de": "Youtube",
+        "en": "Youtube"
+      }
+    }
+  },
+  "links": {
+    "auto-khemorex-klinzhai-de-845f1795": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://www.khemorex-klinzhai.de/"
+    },
+    "auto-kli-org-50e08e29": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://www.kli.org/activities/discord/"
+    },
+    "auto-kli-org-5f9deda6": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://www.kli.org/"
+    },
+    "auto-klingon-wiki-04485095": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://klingon.wiki/En/BoQwI#External_links"
+    },
+    "auto-klingon-wiki-733f1795": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://klingon.wiki/De/NeueVokabeln"
+    },
+    "auto-klingon-wiki-faa17a02": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://klingon.wiki/Wort/Inhalt"
+    },
+    "auto-klingonisch-de-5e09dbaf": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://klingonisch.de/"
+    },
+    "auto-klingonisch-de-77ece698": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://klingonisch.de/lernen/erste-schritte/"
+    },
+    "auto-klingonisch-de-80b3bf8e": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://klingonisch.de/lernen/aussprache/"
+    },
+    "auto-klingonska-org-d727e4cd": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://klingonska.org/"
+    },
+    "auto-nfc-tlhingan-at-fabb8751": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://nfc.tlhIngan.at/2026/Dn001"
+    },
+    "auto-qephom-de-8437e8d0": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://www.qephom.de/"
+    },
+    "auto-tlhingan-org-3c9ecda7": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://tlhingan.org/"
+    },
+    "auto-tlhingan-org-bfeea34d": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://tlhingan.org/piqadmaker"
+    },
+    "be-tlhingan-at": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://be.tlhIngan.at/"
+    },
+    "discord-invite": {
+      "categories": [],
+      "descriptions": {
+        "de": "Einladungslink zum 'Klingonisch-Stammtisch'"
+      },
+      "url": "https://discord.gg/NrUhpvb"
+    },
+    "dropbox-folder": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://www.dropbox.com/scl/fo/gpy26c55f33mex0cl1xur/AHIk7f0hSzeda42GnzFwZ5w?rlkey=45fe46ibzbt9v21va6imdb3ma&dl=0"
+    },
+    "egpyt": {
+      "categories": [
+        "verlag"
+      ],
+      "descriptions": {},
+      "url": "http://www.egpyt.de/"
+    },
+    "facebook-dki": {
+      "categories": [],
+      "descriptions": {},
+      "url": "http://www.facebook.com/deutschesklingonischinstitut/"
+    },
+    "klenginem": {
+      "categories": [],
+      "descriptions": {},
+      "url": "http://www.klenginem.de"
+    },
+    "kli-org": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://kli.org"
+    },
+    "klingon-wiki": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://klingon.wiki"
+    },
+    "klingon-wiki-de-home": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://klingon.wiki/De/Hauptseite"
+    },
+    "klingon-wiki-dictionary-home": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://klingon.wiki/Wort/Hauptseite"
+    },
+    "klingonisch-de": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://klingonisch.de"
+    },
+    "lieven-litaer": {
+      "categories": [],
+      "descriptions": {},
+      "url": "http://www.lieven-litaer.de"
+    },
+    "nfc-dnf01": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://nfc.tlhIngan.at/2026/DnF01"
+    },
+    "nfc-dnf02": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://nfc.tlhIngan.at/2026/DnF02"
+    },
+    "nfc-dnf03": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://nfc.tlhIngan.at/2026/DnF03"
+    },
+    "qephom": {
+      "categories": [],
+      "descriptions": {},
+      "url": "http://www.qephom.de"
+    },
+    "quja-tlhingan-at": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://quja.tlhIngan.at/"
+    },
+    "scrabble-tlhingan-at": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://scrabble.tlhIngan.at/"
+    },
+    "sfa-tlhingan-at": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://sfa.tlhIngan.at/"
+    },
+    "svb-tlhingan-at": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://svb.tlhIngan.at/"
+    },
+    "tlhingan-at": {
+      "categories": [],
+      "descriptions": {},
+      "url": "https://tlhingan.at/"
+    },
+    "youtube-christophalexander4542": {
+      "categories": [
+        "channel"
+      ],
+      "descriptions": {},
+      "url": "https://www.youtube.com/@christophalexander4542/videos"
+    },
+    "youtube-klingonteacher": {
+      "categories": [
+        "channel"
+      ],
+      "descriptions": {},
+      "url": "http://www.youtube.com/klingonteacher"
+    },
+    "youtube-payqaghtlhingan": {
+      "categories": [
+        "channel"
+      ],
+      "descriptions": {},
+      "url": "https://www.youtube.com/@payqaghtlhingan"
+    },
+    "youtube-playlist-foflnx-mhdg": {
+      "categories": [
+        "playlist"
+      ],
+      "descriptions": {},
+      "url": "http://www.youtube.com/watch?v=FOflNX-MHdg&list=PLFEBlPXWQfsiGKG3Pkq9H3s8MOesNfn12"
+    },
+    "youtube-playlist-tt43a9uiyq8": {
+      "categories": [
+        "playlist"
+      ],
+      "descriptions": {},
+      "url": "http://www.youtube.com/watch?v=tt43a9uIYQ8&list=PLBE9160F5DA940513"
+    }
+  },
+  "schemaVersion": 1,
+  "supportedLanguages": [
+    "de",
+    "en"
+  ],
+  "tokenCategories": {
+    "0": {
+      "descriptions": {
+        "de": "Datensteine die keine spezialisierten Inhalte haben, sondern eine Übersicht über alle Themen darstellen."
+      },
+      "labels": {
+        "de": "Allgemein"
+      }
+    },
+    "F": {
+      "descriptions": {
+        "de": "Für Datensteine, die in keine andere Kategorie passen, sowie für Datensteine, die für andere erstellt wurden."
+      },
+      "labels": {
+        "de": "Freiform"
+      }
+    }
+  },
+  "tokens": {
+    "Dn001": {
+      "categoryId": "0",
+      "chipType": "NXP NTAG216",
+      "descriptions": {},
+      "designs": [
+        {
+          "id": "Design01",
+          "name": "Design 1"
+        },
+        {
+          "id": "Design02",
+          "name": "Design 2"
+        }
+      ],
+      "links": [
+        "auto-nfc-tlhingan-at-fabb8751",
+        "auto-klingonisch-de-5e09dbaf",
+        "klingon-wiki-de-home",
+        "auto-klingon-wiki-04485095",
+        "auto-klingonisch-de-77ece698",
+        "auto-qephom-de-8437e8d0",
+        "auto-kli-org-5f9deda6",
+        "auto-klingon-wiki-733f1795",
+        "auto-klingonisch-de-80b3bf8e",
+        "discord-invite",
+        "auto-kli-org-50e08e29",
+        "auto-khemorex-klinzhai-de-845f1795",
+        "auto-tlhingan-org-3c9ecda7",
+        "auto-tlhingan-org-bfeea34d",
+        "auto-klingon-wiki-faa17a02",
+        "auto-klingonska-org-d727e4cd"
+      ],
+      "nfcText": {
+        "descriptions": {},
+        "original": "Klingonisch lernen – wichtige Links und Ressourcen.\nWeitere Infos: nfc.tlhIngan.at/2026/Dn001",
+        "originalLanguage": "de"
+      },
+      "year": 2026
+    },
+    "DnF01": {
+      "categoryId": "F",
+      "chipType": "NXP NTAG216",
+      "descriptions": {},
+      "designs": [
+        {
+          "altTexts": {
+            "back": {
+              "de": "Rückseite des Datensteins DnF01 mit Hutmotiv.",
+              "en": "Back of data stone DnF01, featuring a hat design."
+            },
+            "front": {
+              "de": "Vorderseite des Datensteins DnF01 mit klingonischem Schriftzug und NFC-Symbol.",
+              "en": "Front of data stone DnF01, with Klingon lettering and an NFC symbol."
+            },
+            "model": {
+              "de": "Interaktive 3D-Ansicht des Datensteins DnF01.",
+              "en": "Interactive 3D view of data stone DnF01."
+            }
+          },
+          "id": "Design01",
+          "name": "Design 1"
+        }
+      ],
+      "legacyIds": [
+        "DnF001"
+      ],
+      "links": [
+        "nfc-dnf01",
+        "youtube-payqaghtlhingan",
+        "dropbox-folder",
+        "discord-invite",
+        "klingonisch-de",
+        "kli-org",
+        "klingon-wiki",
+        "klingon-wiki-de-home",
+        "klingon-wiki-dictionary-home"
+      ],
+      "nfcText": {
+        "descriptions": {},
+        "original": "payqagh De'nagh\nlatlh De': nfc.tlhIngan.at/2026/DnF01",
+        "originalLanguage": "tlh"
+      },
+      "shortLabel": {
+        "de": "Datenstein Peter"
+      },
+      "year": 2026
+    },
+    "DnF02": {
+      "categoryId": "F",
+      "chipType": "NXP NTAG216",
+      "descriptions": {},
+      "designs": [
+        {
+          "altTexts": {
+            "back": {
+              "de": "Rückseite des bronzegoldenen Datensteins DnF02 mit dunklem, geflügeltem Emblem.",
+              "en": "Back of the bronze-gold data stone DnF02, with a dark winged emblem."
+            },
+            "front": {
+              "de": "Vorderseite des achteckigen, bronzegoldenen Datensteins DnF02 mit Klingonisch-Signet und NFC-Symbol.",
+              "en": "Front of the bronze-gold octagonal data stone DnF02, with a Klingon insignia and NFC symbol."
+            },
+            "model": {
+              "de": "Interaktive 3D-Ansicht des Datensteins DnF02.",
+              "en": "Interactive 3D view of data stone DnF02."
+            }
+          },
+          "id": "Design01",
+          "name": "Design 1"
+        }
+      ],
+      "links": [
+        "nfc-dnf02",
+        "qephom",
+        "klingonisch-de",
+        "klingon-wiki",
+        "klenginem",
+        "lieven-litaer",
+        "egpyt",
+        "youtube-klingonteacher",
+        "facebook-dki",
+        "youtube-playlist-tt43a9uiyq8",
+        "youtube-playlist-foflnx-mhdg"
+      ],
+      "nfcText": {
+        "descriptions": {},
+        "original": "Lieven Litaer – Klingonischlehrer des Deutschen Klingonisch-Instituts\nnfc.tlhIngan.at/2026/DnF02",
+        "originalLanguage": "de"
+      },
+      "shortLabel": {
+        "de": "Datenstein Lieven"
+      },
+      "year": 2026
+    },
+    "DnF03": {
+      "categoryId": "F",
+      "chipType": "NXP NTAG216",
+      "descriptions": {},
+      "designs": [
+        {
+          "altTexts": {
+            "back": {
+              "de": "Rückseite des Datensteins DnF03."
+            },
+            "front": {
+              "de": "Vorderseite des Datensteins DnF03."
+            },
+            "model": {
+              "de": "Interaktive 3D-Ansicht des Datensteins DnF03."
+            }
+          },
+          "id": "Design01",
+          "name": "Omega and Alpha"
+        }
+      ],
+      "links": [
+        "nfc-dnf03",
+        "tlhingan-at",
+        "scrabble-tlhingan-at",
+        "quja-tlhingan-at",
+        "be-tlhingan-at",
+        "sfa-tlhingan-at",
+        "svb-tlhingan-at",
+        "youtube-christophalexander4542"
+      ],
+      "nfcText": {
+        "descriptions": {},
+        "original": "reyutqa' lupeQ jIH.\nyItIv!\nlatlh De': nfc.tlhIngan.at/2026/DnF03\n\nchorI': [E-Mail-Adresse entfernt]",
+        "originalLanguage": "tlh"
+      },
+      "shortLabel": {
+        "de": "reyutqa' lupeQ"
+      },
+      "year": 2026
+    }
+  }
+}

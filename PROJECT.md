@@ -1,11 +1,12 @@
 # NFC-Website: Projekt- und Architekturleitfaden
 
-Diese Datei beschreibt die dauerhaften Projektregeln und die geplante Website-Architektur. Sie ist eine Arbeitsgrundlage für Maintainer und KI-Assistenten. Bei Änderungen zuerst diese Datei und `data/README.md` lesen.
+Diese Datei hält Architekturentscheidungen fest. Der tägliche Ablauf steht in `prepare/incoming/README.md`; das Datenbankschema steht in `content/README.md`.
 
 ## Quellen und Zuständigkeiten
 
-- `data/database.json` ist die handgepflegte Inhaltsdatenbank für Sprachen, Kategorien, Links und Datensteine. Sie ist die Quelle für diese Inhaltsdaten.
-- `data/README.md` beschreibt das aktuelle Datenbankschema.
+- `content/database.json` ist die normalisierte Inhaltsdatenbank für Sprachen, Kategorien, Links und Datensteine. Neue und geänderte Token werden nach Vorschau über `tools/import_tokens.py` aus `prepare/incoming/<Dn-ID>/` übernommen; weitere redaktionelle Pflege kann direkt in der Datenbank erfolgen.
+- `prepare/incoming/<Dn-ID>/` enthält lokale Rohquellen für neue/geänderte Datensteine. Token-Eingaben sind von Git ausgeschlossen, weil NFCTools-Daten private Angaben enthalten können.
+- `content/README.md` beschreibt das aktuelle Datenbankschema.
 - `tools/build_site.py` erzeugt die statischen HTML-Seiten aus der Inhaltsdatenbank; die Standardausgabe liegt unter `site/`.
 - Diese Datei beschreibt Verhalten, URL-Regeln, Gestaltungsziele und offene Architekturentscheidungen.
 - Ausgelieferte Seiten sollen statisches HTML und CSS sein. Ein Build darf Dateien aus Quelldaten erzeugen; im Browser wird die Seite nicht erst dynamisch aufgebaut.
@@ -53,7 +54,7 @@ URLs aus veröffentlichten Seiten und auf NFC-Tags sind dauerhaft zu erhalten. B
 - Die Webseite enthält ausführlichere Informationen als der NFC-Chip: Beschreibung, Zweck, externe Links, Zusatzinformationen sowie bei Bedarf Medien und technische/historische Hinweise.
 - `shortLabel` enthält eine kurze interne Bezeichnung, die auf Datenstein-Detailseiten und in Auflistungen neben der ausführlichen Beschreibung hilft, einen Datenstein schnell zu erkennen. Das Feld ist nach Sprache lokalisiert.
 - Im NFC-Tag steht zuerst ein kurzer Texteinsatz, der die URL als Text enthält, danach der explizite URL-Eintrag. Ein Android-Test zeigte, dass die Übersicht nur dann angezeigt wurde, wenn der Texteinsatz zuerst kommt. Diese Reihenfolge ist eine praktische Vorgabe aus dem Test.
-- NFCTools-JSON-Exporte sind Referenz-/Quelldaten und können je Datenstein-ID im Repository abgelegt werden. Ihr Format ist nicht das verbindliche Website-Datenbankschema und kann sich noch ändern.
+- NFCTools-JSON-Exporte bleiben als lokale Rohquelle optional unter `prepare/incoming/<Dn-ID>/<Dn-ID>.json`. Der Importer archiviert eine bereinigte Fassung in `content/token_archive/`; das Exportformat ist nicht das verbindliche Website-Datenbankschema und kann sich ändern.
 - Mehrere physische Exemplare mit demselben Inhalt teilen dieselbe Dn-ID, unabhängig vom Design. Auf der gemeinsamen Datensteinseite kann zwischen den Designs gewechselt werden.
 - Auf Token-Seiten sind sichtbare Verweise auf Datensteine mit gleichem Inhalt oder gleichem Design erwünscht. Eine kompakte Infobox oder ein Abschnitt „Verwandte Datensteine“ ist eine mögliche Darstellung; Datenbankschema und genaue Darstellung sind offen.
 - Der Chiptyp wird im Feld `chipType` geführt; für nicht einzeln festgelegte Datensteine gilt der Datenbankstandard `defaultChipType`. Aktuell verwenden alle Datensteine `NXP NTAG216`; frühestens 2027 könnte sich das ändern. Ein anderer Chiptyp soll voraussichtlich als neuer Datenstein mit neuer ID behandelt werden.
@@ -158,15 +159,15 @@ Die Infobox selbst behält ihre vorhandene Fläche und Umrandung; nur ihre Über
 
 ## Bilder und Token-Varianten
 
-Ein Datenstein kann mehrere Designs haben. Gestaltung und Medien liegen pro Design getrennt unter `3d/<Dn-ID>/<Design-ID>/`; gemeinsame Inhaltsdaten bleiben einmal am Datenstein-Datensatz. Die Detailseite ermöglicht den Wechsel zwischen Varianten.
+Ein Datenstein kann mehrere Designs haben. Gestaltung und Medien liegen pro Design getrennt unter `content/media/<Dn-ID>/<Design-ID>/`; gemeinsame Inhaltsdaten bleiben einmal am Datenstein-Datensatz. Die Detailseite ermöglicht den Wechsel zwischen Varianten.
 
 ## Build- und Änderungsregeln
 
-1. Vor Änderungen `PROJECT.md`, `data/README.md` und die betroffenen Daten in `data/database.json` lesen.
-2. Quelldaten und erzeugte Ausgabedateien klar unterscheiden. Quelldaten bleiben im Repository; veröffentlichte Dateien sind statische Artefakte.
+1. Vor Änderungen die betroffenen Quelldaten und die kurze Anleitung in `prepare/incoming/README.md` lesen. Diese Datei hält dauerhafte Architekturentscheidungen fest.
+2. Quelldaten und erzeugte Ausgabedateien klar unterscheiden. Freigegebene Quelldaten liegen unter `content/`; private Roh-Eingaben liegen lokal in `prepare/incoming/`. Veröffentlichte Dateien sind statische Artefakte.
 3. Eine Änderung an der Datenquelle soll den nötigen Build/Regenerierungsschritt nachvollziehbar machen. Build-Schritte dürfen keine manuelle Webserver-Datenbank benötigen.
 4. Vorhandene URLs und Inhalte nicht entfernen oder stillschweigend umwidmen. Alte Tippfehler-URLs nur mit expliziter Legacy-Zuordnung behandeln.
-5. Der Generator ist ein einfaches Python-Skript mit Standardbibliothek (`tools/build_site.py`), das nach `site/` schreibt. Lokal dient dieser Ordner der Vorschau und bleibt von Git ausgeschlossen. GitHub Actions baut ihn bei Änderungen auf `main` und veröffentlicht ihn mit GitHub Pages. Die vorläufige Projektseiten-Adresse ist `https://Cyberman-tM.github.io/nfc-website/`; es wird vorerst keine benutzerdefinierte Domain/CNAME konfiguriert.
+5. `tools/import_tokens.py` zeigt Datenbank- und Medienänderungen zunächst an und übernimmt sie erst mit `--apply` plus Bestätigung. `tools/build_site.py` bleibt ein separater Schritt und liest nur die normalisierte Datenbank. Lokal dient `site/` der Vorschau und bleibt von Git ausgeschlossen. GitHub Actions baut die Website bei Änderungen auf `main` und veröffentlicht sie mit GitHub Pages.
 6. Erklärende Kommentare sind in Quelldaten, Build-Code und Projektdateien willkommen, wenn sie einen Grund oder eine Maintainer-Entscheidung festhalten. Kommentare in ausgeliefertem HTML sind nur für seitenbezogene Hinweise gedacht.
 
 ## Aktuelle Abgleichspunkte
@@ -174,9 +175,9 @@ Ein Datenstein kann mehrere Designs haben. Gestaltung und Medien liegen pro Desi
 Diese Punkte bei Datenänderungen weiterhin gegen die Inhaltsdatenbank und die endgültigen Projektentscheidungen prüfen:
 
 - Kategorie `F` ist als `Freiform` festgelegt. Die Definition soll sowohl nicht anderweitig einordenbare Datensteine als auch für andere erstellte Datensteine umfassen.
-- `data/database.json` führt aktuell nur `de` und `en` als unterstützte Sprachen; `tlh` ist geplant, aber noch nicht als veröffentlichte Übersetzung festgelegt.
+- `content/database.json` führt aktuell nur `de` und `en` als unterstützte Sprachen; `tlh` ist geplant, aber noch nicht als veröffentlichte Übersetzung festgelegt.
 - Die Kategorie-Regel für F, Tokenbeschreibungen und Linkbeschreibungen sind noch zu prüfen und gegebenenfalls zu ergänzen.
-- DnF02 ist für den Jahrgang 2026 in Kategorie F eingetragen. Das GLB-Modell und beide Ansichten liegen in `3d/DnF02/Design01/`. Der NFCTools-Export liegt unter `data/nfctools/DnF02.json`; NFC-Text und Linkziele daraus sind in `database.json` übernommen. Die ausführliche Beschreibung ist noch offen.
+- DnF02 ist für den Jahrgang 2026 in Kategorie F eingetragen. Das GLB-Modell und beide Ansichten liegen in `content/media/DnF02/Design01/`. Der bereinigte NFCTools-Export liegt unter `content/token_archive/DnF02.json`; NFC-Text und Linkziele daraus sind in `content/database.json` übernommen. Die ausführliche Beschreibung ist noch offen.
 - Die ID `DnF001` ist falsch formatiert; gültig ist `DnF01`. `DnF001` wurde tatsächlich auf einem NFC-Tag verwendet und muss daher als dauerhafte Weiterleitung auf `DnF01` erhalten bleiben.
 - Die Jahrgangsgrenze ist festgelegt: Alles vor dem jeweiligen November-qepHom gehört zu diesem qepHom-Jahrgang, alles danach zum nächsten.
 

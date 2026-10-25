@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build the static preview/site from data/database.json using only Python's stdlib."""
+"""Build the static preview/site from content/database.json using only Python's stdlib."""
 
 from __future__ import annotations
 
@@ -14,15 +14,18 @@ from urllib.parse import urlparse
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DATABASE = ROOT / "data" / "database.json"
+DATABASE = ROOT / "content" / "database.json"
+MEDIA = ROOT / "content" / "media"
 TOKEN_ID = re.compile(r"^Dn[0-9A-F]{3}$")
 LEGACY_ID = re.compile(r"^Dn[0-9A-F]{4}$")
+EMAIL_ADDRESS = re.compile(r"(?<![\w.+-])[\w.+-]+@[\w-]+(?:\.[\w-]+)+(?![\w.-])")
 # Make browser caches refresh generated CSS whenever the generator/style source changes.
 ASSET_VERSION = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()[:12]
 
 
 def esc(value: object) -> str:
-    return html.escape(str(value), quote=True)
+    safe_value = EMAIL_ADDRESS.sub("[E-Mail-Adresse entfernt]", str(value))
+    return html.escape(safe_value, quote=True)
 
 
 def write_page(out: Path, relative: str, title: str, description: str, body: str, *, sort_links: bool = False, token_viewer: bool = False, design_picker: bool = False) -> None:
@@ -112,7 +115,7 @@ def copy_token_media(token_id: str, token: dict, out: Path) -> list[dict]:
     result = []
     for design in designs:
         design_id = design["id"]
-        source = ROOT / "3d" / token_id / design_id
+        source = MEDIA / token_id / design_id
         target = out / "media" / token_id / design_id
         files = {"model": f"{token_id}.glb", "front": f"{token_id}_vorne.webp", "back": f"{token_id}_hinten.webp"}
         found = {kind: (source / filename).is_file() for kind, filename in files.items()}
@@ -140,7 +143,7 @@ def token_card(token_id: str, token: dict, context: str = "", href_target: str |
         ("back", f"{token_id}_hinten.webp", f"Rückseite des Datensteins {token_id}", "Rückseite"),
     ):
         design_id = token_designs(token)[0]["id"]
-        if (ROOT / "3d" / token_id / design_id / filename).is_file():
+        if (MEDIA / token_id / design_id / filename).is_file():
             alt = localized(alt_texts.get(side, {})) or fallback_alt
             thumbnails.append(f'<figure><img src="../media/{esc(token_id)}/{esc(design_id)}/{esc(filename)}" alt="{esc(alt)}" width="512" height="512"><figcaption>{caption}</figcaption></figure>')
     gallery = f'<div class="year-card-gallery">{"".join(thumbnails)}</div>' if thumbnails else ""
