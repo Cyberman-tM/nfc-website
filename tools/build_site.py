@@ -669,7 +669,7 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; line-heig
 .token-seal h1 { position: relative; z-index: 1; margin: 0 0 .25rem; color: var(--identity-accent); font-family: Georgia, "Times New Roman", serif; font-size: clamp(1.7rem, 4vw, 2.35rem); font-weight: 500; letter-spacing: -.04em; line-height: 1; }
 .token-seal span { position: relative; z-index: 1; color: var(--muted); font-size: .78rem; letter-spacing: .04em; }
 .token-visual { position: relative; width: clamp(7rem, 20vw, 11rem); flex: 0 0 auto; }
-.token-visual-multi { width: clamp(7rem, 20vw, 11rem); }
+.token-visual-multi { width: clamp(14rem, 40vw, 22rem); }
 .design-viewer-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .35rem; }
 .design-viewer-grid[hidden], .design-stills[hidden] { display: none; }
 .design-card { min-width: 0; }
@@ -766,6 +766,7 @@ td { overflow-wrap: anywhere; }
   .intro-grid article + article { border-top: 1px solid var(--line); }
   .callout { align-items: flex-start; flex-direction: column; padding: 1.4rem; }
   .token-flow { display: flex; flex-direction: column; margin-top: 1.25rem; padding-bottom: 2rem; }
+  .token-visual-multi { grid-column: 1 / -1; width: min(100%, 22rem); justify-self: center; }
   .token-flow > .token-aside { order: 3; float: none; width: 100%; margin: 0 0 1.2rem; }
   .token-flow > .nfc-section { order: 1; }
   .token-flow > .entries-section { order: 2; }
@@ -791,14 +792,14 @@ td { overflow-wrap: anywhere; }
   .token-summary-grid { margin-top: 0; }
   .token-identity { grid-area: identity; }
   .token-visual { grid-area: visual; }
-  .token-visual-multi { grid-area: visual; grid-column: auto; width: clamp(7rem, 25vw, 9rem); }
+  .token-visual-multi { grid-area: auto; grid-column: 1 / -1; grid-row: 3; width: min(100%, 22rem); justify-self: center; }
   .token-hero-description { grid-area: description; margin: 0 auto; }
   .token-visual .viewer-controls-compact { position: static; width: auto; margin-top: .1rem; transform: none; }
   .token-seal { width: 5.3rem; }
   .token-seal h1 { font-size: 1.2rem; }
   .token-seal span { font-size: .62rem; }
   .token-visual { width: 5.5rem; }
-  .token-visual-multi { width: clamp(7rem, 25vw, 9rem); }
+  .token-visual-multi { width: min(100%, 22rem); }
   .model-stage, .static-gallery { height: 31rem; min-height: 0; }
   .model-stage-compact { height: auto; aspect-ratio: 1; }
   .motion-toggle { gap: .15rem; font-size: .65rem; }
