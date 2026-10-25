@@ -102,6 +102,11 @@ def short_label(token: dict) -> str:
     return localized(token.get("shortLabel", {}))
 
 
+def token_title(token: dict) -> str:
+    """Return a token's localized title, if one is available."""
+    return localized(token.get("title", {}))
+
+
 def token_reference(token_id: str, token: dict) -> str:
     """Render a token link whose tooltip identifies it without repeating the label visibly."""
     label = short_label(token)
@@ -212,7 +217,7 @@ def render(out: Path, db: dict) -> None:
 
     token_cards = []
     for token_id, token in sorted(tokens.items()):
-        label = short_label(token)
+        label = token_title(token) or short_label(token)
         label_markup = f'<span class="token-card-short-label">{esc(label)}</span>' if label else ""
         token_cards.append(f'''<a class="record-card" href="{esc(token['year'])}/{esc(token_id)}/">
   <span class="eyebrow">{esc(token['year'])} · {esc(category_name(db, token['categoryId']))}</span>
@@ -332,20 +337,30 @@ def render(out: Path, db: dict) -> None:
         first = design_views[0]
         first_alt_texts = media[0].get("altTexts", legacy_alt_texts)
         model_alt = localized(first_alt_texts.get("model", {})) or f"Interaktive 3D-Ansicht des Datensteins {token_id}; mit Maus oder Touch drehbar."
-        initial_model = f' src="{first["root"]}/{token_id}.glb"' if first["model"] else ""
-        model_markup = f'<model-viewer class="data-stone-viewer"{initial_model} alt="{esc(model_alt)}" camera-controls interaction-prompt="none" rotation-per-second="18deg" shadow-intensity="1" exposure="1" touch-action="pan-y" style="visibility:hidden" aria-hidden="true" inert></model-viewer>' if any(d["model"] for d in design_views) else ""
-        selectors = ""
         if len(design_views) > 1:
-            options = "".join(f'<option value="{i}">{esc(d["name"])}</option>' for i, d in enumerate(design_views))
-            selectors = f'<div class="design-picker" id="design-picker" hidden><button type="button" data-design-step="-1" aria-label="Vorheriges Design">←</button><label>Design <select id="design-select">{options}</select></label><button type="button" data-design-step="1" aria-label="Nächstes Design">→</button><span id="design-count" aria-live="polite">1 von {len(design_views)}</span></div>'
-        media_content = f'''{selectors}<div class="model-stage model-stage-compact" data-designs="{esc(json.dumps(design_views, ensure_ascii=False))}">
+            design_cards = []
+            backs = []
+            common_front = next((d["front"] for d in design_views if d["front"]), "")
+            for index, design in enumerate(design_views):
+                alt_texts = media[index].get("altTexts", legacy_alt_texts)
+                alt = localized(alt_texts.get("model", {})) or f"Interaktive 3D-Ansicht des Datensteins {token_id}, {design['name']}."
+                viewer = f'<model-viewer class="data-stone-viewer" src="{design["root"]}/{token_id}.glb" alt="{esc(alt)}" camera-controls interaction-prompt="none" rotation-per-second="18deg" shadow-intensity="1" exposure="1" touch-action="pan-y" style="visibility:hidden" aria-hidden="true" inert></model-viewer>' if design["model"] else '<p class="media-empty">Keine 3D-Ansicht hinterlegt.</p>'
+                design_cards.append(f'''<article class="design-card"><h3>{esc(design["name"])}</h3><div class="model-stage model-stage-design">{viewer}</div><div class="viewer-controls viewer-controls-design" hidden><button class="motion-toggle" type="button" aria-label="Animation starten" aria-pressed="false"><span class="motion-icon" aria-hidden="true"></span><span class="motion-label">Animation starten</span></button></div><p class="viewer-status visually-hidden" role="status" aria-live="polite">3D-Modell wird geladen …</p></article>''')
+                if design["back"]:
+                    backs.append(f'<figure><img src="{esc(design["back"])}" alt="Rückseite des Datensteins {esc(token_id)}, {esc(design["name"])}" width="512" height="512"><figcaption>{esc(design["name"])} · Rückseite</figcaption></figure>')
+            static_images = (f'<figure><img src="{esc(common_front)}" alt="Vorderseite des Datensteins {esc(token_id)}" width="512" height="512"><figcaption>Vorderseite</figcaption></figure>' if common_front else "") + "".join(backs)
+            media_content = f'<div class="token-designs"><div class="design-viewer-grid" hidden>{"".join(design_cards)}</div><div class="design-stills">{static_images}</div></div>'
+        else:
+            initial_model = f' src="{first["root"]}/{token_id}.glb"' if first["model"] else ""
+            model_markup = f'<model-viewer class="data-stone-viewer"{initial_model} alt="{esc(model_alt)}" camera-controls interaction-prompt="none" rotation-per-second="18deg" shadow-intensity="1" exposure="1" touch-action="pan-y" style="visibility:hidden" aria-hidden="true" inert></model-viewer>' if any(d["model"] for d in design_views) else ""
+            media_content = f'''<div class="model-stage model-stage-compact" data-designs="{esc(json.dumps(design_views, ensure_ascii=False))}">
   {model_markup}
   <div class="viewer-fallback" id="viewer-fallback">{first["gallery"]}</div>
 </div>
 <div class="viewer-controls viewer-controls-compact" id="viewer-controls" hidden><button class="motion-toggle" id="motion-toggle" type="button" aria-label="Animation starten" aria-pressed="false"><span class="motion-icon" aria-hidden="true"></span><span id="motion-label">Animation starten</span></button></div>
 <p class="viewer-status viewer-status-compact visually-hidden" id="viewer-status" role="status" aria-live="polite">Statische Ansicht. 3D-Modell wird geladen …</p>'''
         if first["model"] or first["front"] or first["back"]:
-            heading_visual = f'<div class="token-visual">{media_content}</div>'
+            heading_visual = f'<div class="token-visual{" token-visual-multi" if len(design_views) > 1 else ""}">{media_content}</div>'
             media_section = ""
         else:
             heading_visual = ""
@@ -358,7 +373,7 @@ def render(out: Path, db: dict) -> None:
             token_links.append(f'<li><a href="{esc(url)}">{esc(label)}</a></li>')
         nfc_text = token.get("nfcText", {}).get("original", "")
         chip_type = token.get("chipType") or db.get("defaultChipType") or "Noch nicht angegeben"
-        label = short_label(token)
+        label = token_title(token) or short_label(token)
         label_markup = f'<p class="token-hero-short-label">{esc(label)}</p>' if label else ""
         description = localized(token.get("descriptions", {}))
         detail = f'<p class="token-description">{esc(description)}</p>' if description else '<p class="empty-state">Die ausführliche Beschreibung für diesen Datenstein ist noch nicht eingetragen.</p>'
@@ -369,7 +384,8 @@ def render(out: Path, db: dict) -> None:
 <section class="content-section nfc-section"><p class="eyebrow">Text auf dem Chip</p>{nfc_block}</section>
 <section class="content-section entries-section"><p class="eyebrow">Einträge</p><ul class="resource-list">{''.join(token_links) or '<li>Keine Einträge vorhanden.</li>'}</ul></section>
 {media_section}</div>'''
-        write_page(out, f"{year}/{token_id}/index.html", token_id, f"Dokumentation für Datenstein {token_id}, Jahrgang {year}.", body, token_viewer=any(d["model"] for d in media), design_picker=len(media) > 1)
+        page_title = token_title(token) or token_id
+        write_page(out, f"{year}/{token_id}/index.html", f"{page_title} · {token_id}", f"Dokumentation für Datenstein {token_id}, Jahrgang {year}.", body, token_viewer=any(d["model"] for d in media))
         for legacy_id in token.get("legacyIds", []):
             legacy_target = f"../{token_id}/"
             legacy_body = f'''<header class="page-heading"><p class="eyebrow">Frühere Adresse</p><h1>{esc(legacy_id)}</h1><p>Diese Adresse wurde früher verwendet. Der Datenstein ist jetzt unter <a href="{esc(legacy_target)}">{esc(token_id)}</a> dokumentiert.</p></header>
@@ -455,7 +471,14 @@ def render(out: Path, db: dict) -> None:
 <p class="back-link"><a class="text-link" href="../../">← Zur gesamten Linkübersicht</a></p>'''
         write_page(out, f"links/categories/{category_id}/index.html", f"Links: {label}", f"Alle Links der Kategorie {label}.", category_body)
 
-    write_page(out, "404.html", "Seite nicht gefunden", "Die angeforderte Seite ist nicht vorhanden.", '''<header class="page-heading"><p class="eyebrow">404</p><h1>Seite nicht gefunden</h1><p>Diese Adresse ist im Verzeichnis nicht vorhanden.</p><a class="button button-primary" href="index.html">Zur Startseite</a></header>''')
+    # GitHub Pages keeps the originally requested URL in the address bar when
+    # serving 404.html. Set a base URL so relative assets and navigation links
+    # still resolve from the published project site, even for deeply nested
+    # missing URLs.
+    not_found = out / "404.html"
+    not_found_html = not_found.read_text(encoding="utf-8")
+    not_found_html = not_found_html.replace("<head>\n", '<head>\n  <base href="/nfc-website/">\n', 1)
+    not_found.write_text(not_found_html, encoding="utf-8", newline="\n")
     (out / "assets").mkdir(parents=True, exist_ok=True)
     (out / "assets" / "site.css").write_text(CSS, encoding="utf-8", newline="\n")
     (out / "assets" / "links-sort.js").write_text(JS, encoding="utf-8", newline="\n")
@@ -645,6 +668,20 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; line-heig
 .token-seal h1 { position: relative; z-index: 1; margin: 0 0 .25rem; color: var(--identity-accent); font-family: Georgia, "Times New Roman", serif; font-size: clamp(1.7rem, 4vw, 2.35rem); font-weight: 500; letter-spacing: -.04em; line-height: 1; }
 .token-seal span { position: relative; z-index: 1; color: var(--muted); font-size: .78rem; letter-spacing: .04em; }
 .token-visual { position: relative; width: clamp(7rem, 20vw, 11rem); flex: 0 0 auto; }
+.token-visual-multi { width: clamp(7rem, 20vw, 11rem); }
+.design-viewer-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .35rem; }
+.design-viewer-grid[hidden], .design-stills[hidden] { display: none; }
+.design-card { min-width: 0; }
+.design-card h3 { margin: 0 0 .25rem; color: var(--accent-soft); font-size: .78rem; font-weight: 500; text-align: center; }
+.model-stage-design { height: auto; aspect-ratio: .9; min-height: 0; background: radial-gradient(ellipse at center, #34302a 0%, #24211e 58%, var(--panel) 100%); }
+.model-stage-design .data-stone-viewer, .model-stage-design .viewer-fallback { padding: .5rem; }
+.model-stage-design .viewer-fallback { display: grid; place-items: center; }
+.model-stage-design .viewer-fallback img { width: 100%; height: 100%; object-fit: contain; }
+.viewer-controls-design { display: flex; justify-content: center; margin-top: .2rem; }
+.design-stills { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .35rem; margin-top: .5rem; }
+.design-stills figure { min-width: 0; margin: 0; text-align: center; }
+.design-stills img { display: block; width: 100%; max-height: 5.5rem; object-fit: contain; }
+.design-stills figcaption { padding: .15rem 0; color: var(--muted); font-size: .65rem; }
 .token-content { padding-bottom: 4rem; }
 .token-flow { display: flow-root; margin-top: 1.25rem; }
 .token-flow > .token-aside { float: right; width: min(19rem, 36%); margin: 1.7rem 0 1.5rem 3rem; }
@@ -753,18 +790,25 @@ td { overflow-wrap: anywhere; }
   .token-summary-grid { margin-top: 0; }
   .token-identity { grid-area: identity; }
   .token-visual { grid-area: visual; }
+  .token-visual-multi { grid-area: visual; grid-column: auto; width: clamp(7rem, 25vw, 9rem); }
   .token-hero-description { grid-area: description; margin: 0 auto; }
   .token-visual .viewer-controls-compact { position: static; width: auto; margin-top: .1rem; transform: none; }
   .token-seal { width: 5.3rem; }
   .token-seal h1 { font-size: 1.2rem; }
   .token-seal span { font-size: .62rem; }
   .token-visual { width: 5.5rem; }
+  .token-visual-multi { width: clamp(7rem, 25vw, 9rem); }
   .model-stage, .static-gallery { height: 31rem; min-height: 0; }
   .model-stage-compact { height: auto; aspect-ratio: 1; }
   .motion-toggle { gap: .15rem; font-size: .65rem; }
   .viewer-fallback { grid-template-columns: 1fr; gap: .35rem; padding: .4rem; }
   .viewer-fallback figure { min-height: 0; }
   .viewer-fallback figcaption { padding: .15rem; }
+  .design-viewer-grid { gap: .25rem; }
+  .design-card h3 { font-size: .68rem; }
+  .model-stage-design { aspect-ratio: .9; }
+  .design-stills { gap: .25rem; margin-top: .4rem; }
+  .design-stills img { max-height: 4.5rem; }
   table { min-width: 48rem; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -863,77 +907,92 @@ DESIGN_PICKER_JS = r'''"use strict";
 
 TOKEN_VIEWER_JS = r'''"use strict";
 (function () {
-  const viewer = document.querySelector(".data-stone-viewer");
-  if (!viewer) return;
-  const fallback = document.getElementById("viewer-fallback");
-  const controls = document.getElementById("viewer-controls");
-  const toggle = document.getElementById("motion-toggle");
-  const motionLabel = document.getElementById("motion-label");
-  const status = document.getElementById("viewer-status");
+  const viewers = Array.from(document.querySelectorAll(".data-stone-viewer"));
+  if (!viewers.length) return;
   const fallbackMessage = "3D-Ansicht nicht verfügbar. Vorder- und Rückseite werden als Bilder angezeigt.";
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  let settled = false;
-  let moving = false;
-  let hasEmbeddedAnimation = false;
-
-  function setMotion(enabled) {
-    moving = enabled;
-    if (hasEmbeddedAnimation) {
-      if (enabled) viewer.play();
-      else viewer.pause();
-    } else if (enabled) viewer.setAttribute("auto-rotate", "");
-    else viewer.removeAttribute("auto-rotate");
-    toggle.setAttribute("aria-pressed", String(enabled));
-    const noun = hasEmbeddedAnimation ? "Animation" : "Drehung";
-    const action = enabled ? "pausieren" : "starten";
-    toggle.setAttribute("aria-label", `${noun} ${action}`);
-    motionLabel.textContent = `${noun} ${action}`;
+  const multiGroup = document.querySelector(".token-designs");
+  const multiGrid = multiGroup && multiGroup.querySelector(".design-viewer-grid");
+  const multiStills = multiGroup && multiGroup.querySelector(".design-stills");
+  const loadedAnimations = new Set();
+  let multiFailed = false;
+  function showMultiFallback() {
+    multiFailed = true;
+    multiGrid.hidden = true;
+    multiStills.hidden = false;
   }
-
-  function showFallback() {
-    viewer.hidden = true;
-    viewer.removeAttribute("aria-hidden");
-    viewer.inert = true;
-    fallback.hidden = false;
-    status.textContent = fallbackMessage;
-  }
-
-  const timer = window.setTimeout(() => {
-    if (!settled) showFallback();
-  }, 15000);
-
-  viewer.addEventListener("load", () => {
-    settled = true;
-    window.clearTimeout(timer);
-    viewer.hidden = false;
-    viewer.style.visibility = "visible";
-    viewer.removeAttribute("aria-hidden");
-    viewer.inert = false;
-    fallback.hidden = true;
-    controls.hidden = false;
-    hasEmbeddedAnimation = viewer.availableAnimations.length > 0;
-    if (hasEmbeddedAnimation) {
-      viewer.animationName = viewer.availableAnimations[0];
-      if (!reducedMotion) viewer.setAttribute("autoplay", "");
-      setMotion(!reducedMotion);
-      status.textContent = reducedMotion
-        ? "3D-Modell geladen. Die Modellanimation ist zunächst pausiert."
-        : "3D-Modell geladen. Die Animation lässt sich pausieren; das Modell kann zusätzlich mit Maus oder Touch gedreht und gezoomt werden.";
-    } else {
-      setMotion(!reducedMotion);
-      status.textContent = reducedMotion
-        ? "3D-Modell geladen. Bewegungen sind zunächst pausiert."
-        : "3D-Modell geladen. Mit Maus oder Touch drehen und zoomen. Die automatische Drehung lässt sich pausieren.";
+  viewers.forEach(viewer => {
+    const card = viewer.closest(".design-card");
+    const fallback = card ? card.querySelector(".viewer-fallback") : document.getElementById("viewer-fallback");
+    const controls = card ? card.querySelector(".viewer-controls") : document.getElementById("viewer-controls");
+    const toggle = controls && controls.querySelector(".motion-toggle");
+    const motionLabel = toggle && toggle.querySelector(".motion-label, #motion-label");
+    const status = card ? card.querySelector(".viewer-status") : document.getElementById("viewer-status");
+    let settled = false;
+    let moving = false;
+    let hasEmbeddedAnimation = false;
+    function setMotion(enabled) {
+      moving = enabled;
+      if (hasEmbeddedAnimation) {
+        if (enabled) viewer.play(); else viewer.pause();
+      } else if (enabled) viewer.setAttribute("auto-rotate", "");
+      else viewer.removeAttribute("auto-rotate");
+      toggle.setAttribute("aria-pressed", String(enabled));
+      const noun = hasEmbeddedAnimation ? "Animation" : "Drehung";
+      const action = enabled ? "pausieren" : "starten";
+      toggle.setAttribute("aria-label", `${noun} ${action}`);
+      motionLabel.textContent = `${noun} ${action}`;
     }
+    function showFallback() {
+      if (multiGroup) {
+        showMultiFallback();
+        viewer.hidden = true;
+        viewer.removeAttribute("aria-hidden");
+        viewer.inert = true;
+        status.textContent = fallbackMessage;
+        return;
+      }
+      viewer.hidden = true;
+      viewer.removeAttribute("aria-hidden");
+      viewer.inert = true;
+      fallback.hidden = false;
+      status.textContent = fallbackMessage;
+    }
+    const timer = window.setTimeout(() => { if (!settled) showFallback(); }, 15000);
+    viewer.addEventListener("load", () => {
+      settled = true;
+      window.clearTimeout(timer);
+      viewer.hidden = false;
+      viewer.style.visibility = "visible";
+      viewer.removeAttribute("aria-hidden");
+      viewer.inert = false;
+      if (!multiGroup) fallback.hidden = true;
+      controls.hidden = false;
+      hasEmbeddedAnimation = viewer.availableAnimations.length > 0;
+      if (multiGroup && !hasEmbeddedAnimation) {
+        showMultiFallback();
+        status.textContent = fallbackMessage;
+        return;
+      }
+      if (hasEmbeddedAnimation) {
+        viewer.animationName = viewer.availableAnimations[0];
+        if (!reducedMotion) viewer.setAttribute("autoplay", "");
+      }
+      setMotion(!reducedMotion);
+      if (multiGroup) {
+        loadedAnimations.add(viewer);
+        if (!multiFailed && loadedAnimations.size === multiGrid.querySelectorAll(".design-card").length) {
+          multiGrid.hidden = false;
+          multiStills.hidden = true;
+        }
+      }
+      status.textContent = hasEmbeddedAnimation
+        ? (reducedMotion ? "3D-Modell geladen. Die Animation ist zunächst pausiert." : "3D-Modell geladen. Die Animation lässt sich pausieren; das Modell kann mit Maus oder Touch gedreht und gezoomt werden.")
+        : (reducedMotion ? "3D-Modell geladen. Bewegungen sind zunächst pausiert." : "3D-Modell geladen. Mit Maus oder Touch drehen und zoomen.");
+    });
+    viewer.addEventListener("error", () => { settled = true; window.clearTimeout(timer); showFallback(); });
+    toggle.addEventListener("click", () => setMotion(!moving));
   });
-
-  viewer.addEventListener("error", () => {
-    settled = true;
-    window.clearTimeout(timer);
-    showFallback();
-  });
-
-  toggle.addEventListener("click", () => setMotion(!moving));
 })();
 '''
 

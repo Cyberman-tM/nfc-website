@@ -10,6 +10,7 @@
 - Die globale Linkübersicht zeigt externe Ziel-URLs. URLs auf `nfc.tlhIngan.at` bleiben den Datensteinseiten zugeordnet, werden aber aus dieser Übersicht ausgeblendet.
 - `tokens` enthält Datensteine. `links` verweist auf Link-IDs, damit Beschreibungen nicht pro Datenstein dupliziert werden müssen.
 - `tokens.*.descriptions` enthält die lokalisierten Texte zum Datenstein.
+- `tokens.*.title` enthält einen optionalen lokalisierten Titel. Er wird auf der Detailseite angezeigt und im Seitentitel vor der Dn-ID verwendet.
 - `tokens.*.shortLabel` enthält eine kurze, lokalisierbare Bezeichnung, die auf Detailseiten und in Datenstein-Auflistungen zusätzlich zur ausführlichen Beschreibung erscheint.
 - `tokens.*.designs[].altTexts` enthält optionale, lokalisierte Alternativtexte für `model`, `front` und `back` des jeweiligen Designs. Sie beschreiben den Bildinhalt, nicht den Dateinamen; fehlt ein Text, erzeugt der Website-Build einen allgemeinen Ersatztext.
 - `tokens.*.year` enthält das Jahr des Datensteins.

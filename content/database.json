@@ -352,7 +352,9 @@
     "Dn001": {
       "categoryId": "0",
       "chipType": "NXP NTAG216",
-      "descriptions": {},
+      "descriptions": {
+        "de": "Eine Auswahl Links für Anfänger und Fortgeschrittene"
+      },
       "designs": [
         {
           "id": "Design01",
@@ -385,6 +387,9 @@
         "descriptions": {},
         "original": "Klingonisch lernen – wichtige Links und Ressourcen.\nWeitere Infos: nfc.tlhIngan.at/2026/Dn001",
         "originalLanguage": "de"
+      },
+      "title": {
+        "de": "Allgemeine Links und Resourcen"
       },
       "year": 2026
     },
