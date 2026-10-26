@@ -298,10 +298,34 @@ def render(out: Path, db: dict) -> None:
         f'<li><a href="{esc(token["year"])}/{esc(token_id)}/"><span><strong>{esc(token_id)}</strong><small>{esc(short_label(token) or category_name(db, token["categoryId"]))}</small></span><span>{esc(token["year"])} <span aria-hidden="true">↗</span></span></a></li>'
         for token_id, token in sorted(tokens.items())
     )
-    home_content = f'''<section class="hero">
-  <p class="eyebrow">Ein kleines Verzeichnis mit langer Lebensdauer</p>
-  <h1>Datensteine.<br><span>Dokumentiert für später.</span></h1>
-  <div class="hero-stamp" aria-hidden="true"><span>dez</span><b>nag</b><i></i></div>
+    home_content = f'''<section class="home-introduction" aria-labelledby="what-is-a-data-stone">
+  <header class="intro-heading">
+    <p class="eyebrow">De' nagh · Datenstein</p>
+    <h2 id="what-is-a-data-stone">Ein kleiner Stein, viele Wege zu Wissen.</h2>
+    <p class="intro-lead">Was ist ein Datenstein? Kurz gesagt: ein NFC-Token – ein kleiner Speicher, den dein Handy berührungslos lesen kann.</p>
+    <div class="hero-stamp" aria-hidden="true"><span>dez</span><b>nag</b><i></i></div>
+  </header>
+  <div class="intro-copy">
+    <section aria-labelledby="nfc-heading">
+      <h3 id="nfc-heading">Was steckt in NFC?</h3>
+      <p>NFC steht für <i>Near Field Communication</i>. Ein NFC-Chip bezieht seine Energie nicht aus einer eigenen Batterie, sondern wird beim Lesen oder Beschreiben über Funk vom Gerät versorgt.</p>
+      <p>Am bekanntesten ist NFC vom kontaktlosen Bezahlen mit dem Handy oder einer Karte. Weniger bekannt ist, dass diese Chips auch vergleichsweise viele Daten speichern können – zum Beispiel Links.</p>
+    </section>
+    <section aria-labelledby="idea-heading">
+      <h3 id="idea-heading">Eine Sammlung zum Mitnehmen</h3>
+      <p>Datensteine sind NFC-Token mit Themen rund um die klingonische Sprache und Kultur. So ziemlich jedes moderne Handy kann sie lesen.</p>
+      <p>Die Idee: Man hat eine Handvoll <i>De' naghmey</i> bei sich und damit jederzeit eine vorsortierte Sammlung relevanter Links zur Hand.</p>
+    </section>
+    <section aria-labelledby="reading-heading">
+      <h3 id="reading-heading">So liest du einen Datenstein</h3>
+      <p>Wie die Inhalte eines NFC-Tags angezeigt werden, ist leider nicht einheitlich geregelt. Manche Handys zeigen eine Liste aller Einträge, andere öffnen direkt die erste URL.</p>
+      <p>Um das abzufangen, enthält jeder Datenstein als ersten Eintrag einen Link zu seiner eigenen Seite hier. Dort sind alle Einträge noch einmal aufgelistet. So kannst du in Ruhe stöbern und auch andere Datensteine ansehen, ohne den Token erneut ans Handy halten zu müssen.</p>
+    </section>
+    <aside class="intro-note" aria-label="Datenstein-ID und Design">
+      <h3>ID und Design</h3>
+      <p>Die Dn-ID steht für den Inhalt (und die Kategorie) des Datensteins. Mehrere physische Designs können sich die gleiche ID (und damit Webseite) teilen, solange der Inhalt identisch ist.</p>
+    </aside>
+  </div>
 </section>
 <section class="home-dashboard" aria-labelledby="overview-title">
   <div class="section-heading"><h2 id="overview-title">Bestand</h2></div>
@@ -629,6 +653,20 @@ h2 { font-family: Georgia, "Times New Roman", serif; font-weight: 500; line-heig
 .intro-grid h2 { margin: .4rem 0; font-size: 1.5rem; }
 .intro-grid p, .callout p, .page-heading > p:not(.eyebrow) { color: var(--muted); }
 .section-block { padding: 3.2rem 0; }
+.home-introduction { padding: clamp(2.5rem, 6vw, 4.5rem) 0; border-bottom: 1px solid var(--line); }
+.intro-heading { position: relative; min-height: 23rem; padding: 0 20rem 1.5rem 0; }
+.intro-heading h2 { max-width: 39rem; margin: .3rem 0 1rem; color: var(--identity-accent); font-size: clamp(2rem, 3.4vw, 3rem); }
+.intro-lead { max-width: 39rem; color: var(--text); font-size: 1.12rem; line-height: 1.65; }
+.intro-copy { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem 2rem; }
+.intro-copy section { padding: 0 0 1rem; }
+.intro-copy section:nth-child(3) { grid-column: 1 / -1; }
+.intro-copy h3 { margin: 0 0 .5rem; color: var(--accent-soft); font-family: Georgia, "Times New Roman", serif; font-size: 1.3rem; font-weight: 500; }
+.intro-copy p { margin: .45rem 0; color: var(--muted); line-height: 1.7; }
+.intro-copy i { color: var(--text); }
+.intro-note { grid-column: 1 / -1; padding: 1.2rem 1.4rem; border-left: .2rem solid var(--accent); background: var(--panel); }
+.intro-note h3 { color: var(--identity-accent); }
+.intro-note strong { color: var(--text); }
+.intro-heading .hero-stamp { top: 0; }
 .home-dashboard { padding: 2.5rem 0 4rem; }
 .home-dashboard > .section-heading { margin-bottom: 1.2rem; }
 .home-dashboard > .section-heading h2 { margin: .1rem 0; color: var(--identity-accent); font-size: 2.2rem; }
@@ -821,6 +859,7 @@ td { overflow-wrap: anywhere; }
   .hero-stamp { right: .5rem; top: 13%; width: 7rem; opacity: .12; }
   .overview-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .overview-breakdown { gap: 1.5rem; }
+  .intro-heading { min-height: 14rem; padding-right: 12rem; }
   .intro-grid { grid-template-columns: 1fr; }
   .intro-grid article, .intro-grid article + article { padding: 1.3rem 0; border-left: 0; }
   .intro-grid article + article { border-top: 1px solid var(--line); }
@@ -845,6 +884,8 @@ td { overflow-wrap: anywhere; }
   .primary-nav, .language-switch { justify-content: flex-start; }
   .hero-stamp { display: none; }
   .overview-breakdown { grid-template-columns: 1fr; gap: 2rem; }
+  .intro-copy { grid-template-columns: 1fr; gap: .6rem; }
+  .intro-copy section:nth-child(3), .intro-note { grid-column: auto; }
   .hero h1 { font-size: clamp(2.6rem, 13vw, 4rem); }
   .section-heading { align-items: flex-start; flex-direction: column; }
   .token-heading { grid-template-columns: auto auto; grid-template-areas: "identity visual" "description description"; align-items: start; justify-content: center; gap: 1rem clamp(1rem, 8vw, 3rem); padding-bottom: 2.5rem; }
